@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -m venv venv)",
+      "Bash(venv/bin/pip install *)",
+      "Bash(pip3 install *)",
+      "Bash(python3 -c \"import fastapi, pydantic; print\\('deps OK'\\)\")",
+      "Bash(python3 -m pip install -q fastapi uvicorn pydantic)",
+      "Bash(~/.local/bin/pip install *)",
+      "Bash(curl -s https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py)",
+      "Bash(/home/lukas/Documents/Code/trained-gut/backend/venv/bin/python3 /tmp/get-pip.py -q)",
+      "Bash(venv/bin/python3 *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('Status:', d['status']\\); p=d['plan']; print\\(f'Weeks: {p[\\\\\"total_weeks\\\\\"]}, Start: {p[\\\\\"starting_carbs_per_hour_g\\\\\"]}g/hr, Peak: {p[\\\\\"race_target_carbs_per_hour_g\\\\\"]}g/hr, Total gels: {p[\\\\\"gel_package\\\\\"][\\\\\"total_gels\\\\\"]}'\\)\")",
+      "Bash(kill %1)",
+      "Bash(venv/bin/pytest *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)"
+    ]
+  }
+}

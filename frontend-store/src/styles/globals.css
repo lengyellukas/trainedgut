@@ -1,0 +1,49 @@
+/* ── DESIGN SYSTEM (matches trainedgut.com) ─────────────────── */
+:root {
+  --cream:      #F5F0E8;
+  --dark:       #1A1A14;
+  --dark-2:     #222219;
+  --dark-3:     #2d2d22;
+  --orange:     #E8521A;
+  --gold:       #C8963E;
+  --gray:       #6B6B5E;
+  --light-gray: #E2DDD4;
+  --white:      #FDFAF5;
+  --danger:     #e85252;
+  --success:    #5ab88a;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; height: 100%; }
+
+body {
+  background: var(--dark);
+  color: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  min-height: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root { min-height: 100vh; display: flex; flex-direction: column; }
+
+/* ── TYPOGRAPHY ─────────────────────────────────────────────── */
+.font-display {
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 0.02em;
+}
+.font-italic {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+}
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--orange);
+}
+
+/* ── UTILITY ────────────────────────────────────────────────── */
+.text-gold  { color: var(--gold); }
+.text-orange { color: var(--orange); }
+.text-muted { color: rgba(255,255,255,0.4); }
