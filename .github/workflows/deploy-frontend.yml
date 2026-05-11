@@ -30,12 +30,13 @@ jobs:
         working-directory: frontend-store
         run: npm run build
 
-      - name: Deploy via FTP
+      - name: Deploy via SFTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          protocol: ftp
+          protocol: ftps-legacy
           server: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USERNAME }}
           password: ${{ secrets.SFTP_PASSWORD }}
           server-dir: ${{ secrets.SFTP_TARGET_DIR }}
           local-dir: frontend-store/dist/
+          dangerous-clean-slate: true
