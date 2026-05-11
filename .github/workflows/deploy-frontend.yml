@@ -31,11 +31,11 @@ jobs:
         run: npm run build
 
       - name: Deploy via SFTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
-          protocol: ftps
           server: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USERNAME }}
           password: ${{ secrets.SFTP_PASSWORD }}
-          server-dir: ${{ secrets.SFTP_TARGET_DIR }}
-          local-dir: frontend-store/dist/
+          remote_path: ${{ secrets.SFTP_TARGET_DIR }}
+          local_path: frontend-store/dist/*
+          sftp_only: true
