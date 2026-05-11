@@ -21,7 +21,7 @@ const STEPS = [
 
 const INITIAL_DATA = {
   // About You (height/gender are frontend-only - 3 not sent to backend)
-  //TODO: send them to backend
+  //TODO: send them to backend so they might be eventually used
   gender: '',
   age: '',
   height_cm: '',
