@@ -30,12 +30,12 @@ jobs:
         working-directory: frontend-store
         run: npm run build
 
-      - name: Deploy via SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
+          protocol: ftp
           server: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USERNAME }}
           password: ${{ secrets.SFTP_PASSWORD }}
-          remote_path: ${{ secrets.SFTP_TARGET_DIR }}
-          local_path: frontend-store/dist/*
-          sftp_only: true
+          server-dir: ${{ secrets.SFTP_TARGET_DIR }}
+          local-dir: frontend-store/dist/
