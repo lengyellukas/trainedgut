@@ -195,5 +195,8 @@ class TestFuelingWindows:
     def test_3h_to_4h_has_6_windows(self):
         assert n_fueling_windows(SessionDurationOption.BETWEEN_3H_AND_4H) == 6
 
-    def test_over_4h_has_8_windows(self):
-        assert n_fueling_windows(SessionDurationOption.OVER_4H) == 8
+    def test_4h_to_6h_has_10_windows(self):
+        assert n_fueling_windows(SessionDurationOption.BETWEEN_4H_AND_6H) == 10
+
+    def test_over_6h_has_12_windows(self):
+        assert n_fueling_windows(SessionDurationOption.OVER_6H) == 12

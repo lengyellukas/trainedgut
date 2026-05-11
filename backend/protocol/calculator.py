@@ -24,7 +24,8 @@ SESSION_FUELING_WINDOWS: Dict[SessionDurationOption, int] = {
     SessionDurationOption.BETWEEN_90MIN_AND_2H: 2,
     SessionDurationOption.BETWEEN_2H_AND_3H: 4,
     SessionDurationOption.BETWEEN_3H_AND_4H: 6,
-    SessionDurationOption.OVER_4H: 8,
+    SessionDurationOption.BETWEEN_4H_AND_6H: 10,
+    SessionDurationOption.OVER_6H: 12,
 }
 
 

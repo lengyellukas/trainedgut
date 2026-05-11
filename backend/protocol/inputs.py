@@ -6,19 +6,13 @@ from pydantic import BaseModel
 
 
 class SportType(str, Enum):
-    MARATHON = "marathon"
-    ULTRA_TRAIL = "ultra_trail"
-    TRAIL_RUNNING = "trail_running"
-    IRONMAN = "ironman"
-    HALF_IRONMAN = "half_ironman"
-    TRIATHLON_SPRINT_OLYMPIC = "triathlon_sprint_olympic"
-    GRAN_FONDO = "gran_fondo"
-    CYCLING_ENDURANCE = "cycling_endurance"
-    HYROX = "hyrox"
-    SPARTAN = "spartan"
-    OCR = "ocr"
+    RUNNING = "running"
+    TRIATHLON = "triathlon"
+    CYCLING = "cycling"
+
+    OBSTACLE_RACE = "obstacle_race"
     DUATHLON = "duathlon"
-    SWIMRUN = "swimrun"
+    SWIMMING = "swimming"
 
 
 class CarbToleranceOption(str, Enum):
@@ -32,7 +26,8 @@ class SessionDurationOption(str, Enum):
     BETWEEN_90MIN_AND_2H = "90min_to_2h"  # 2 fueling windows
     BETWEEN_2H_AND_3H = "2h_to_3h"        # 4 fueling windows
     BETWEEN_3H_AND_4H = "3h_to_4h"        # 6 fueling windows
-    OVER_4H = "over_4h"                    # 8 fueling windows
+    BETWEEN_4H_AND_6H = "4h_to_6h"        # 10 fueling windows
+    OVER_6H = "over_6h"                    # 12 fueling windows
 
 
 class GIHistory(str, Enum):

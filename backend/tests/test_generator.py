@@ -14,7 +14,7 @@ from protocol.models import GelRatio, PlanStatus
 def _make_profile(**overrides) -> AthleteProfile:
     defaults = dict(
         body_weight_kg=70,
-        sport_type=SportType.IRONMAN,
+        sport_type=SportType.TRIATHLON,
         target_race_time_hours=11.0,
         race_date=date(2026, 9, 20),
         start_preference=StartPreference.IMMEDIATELY,
@@ -174,7 +174,7 @@ class TestSessions:
     def test_session_count_matches_long_sessions_input(self):
         profile = _make_profile(long_sessions=[
             LongSession(duration_option=SessionDurationOption.BETWEEN_2H_AND_3H),
-            LongSession(duration_option=SessionDurationOption.OVER_4H),
+            LongSession(duration_option=SessionDurationOption.OVER_6H),
         ])
         response = generate_plan(profile, today=TODAY)
         for week in response.plan.weeks:
@@ -188,13 +188,13 @@ class TestSessions:
         for week in response.plan.weeks:
             assert week.sessions[0].n_fueling_windows == 2
 
-    def test_long_session_has_8_fueling_windows(self):
+    def test_long_session_has_12_fueling_windows(self):
         profile = _make_profile(long_sessions=[
-            LongSession(duration_option=SessionDurationOption.OVER_4H),
+            LongSession(duration_option=SessionDurationOption.OVER_6H),
         ])
         response = generate_plan(profile, today=TODAY)
         for week in response.plan.weeks:
-            assert week.sessions[0].n_fueling_windows == 8
+            assert week.sessions[0].n_fueling_windows == 12
 
     def test_actual_carbs_never_below_target_carbs_per_window(self):
         response = generate_plan(_make_profile(), today=TODAY)
@@ -222,7 +222,7 @@ class TestGelPackage:
     def test_total_gels_matches_sum_of_all_windows(self):
         profile = _make_profile(long_sessions=[
             LongSession(duration_option=SessionDurationOption.BETWEEN_2H_AND_3H),
-            LongSession(duration_option=SessionDurationOption.OVER_4H),
+            LongSession(duration_option=SessionDurationOption.OVER_6H),
         ])
         response = generate_plan(profile, today=TODAY)
         plan = response.plan

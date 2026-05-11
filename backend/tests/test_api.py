@@ -7,7 +7,7 @@ client = TestClient(app)
 
 VALID_PAYLOAD = {
     "body_weight_kg": 75,
-    "sport_type": "ironman",
+    "sport_type": "triathlon",
     "target_race_time_hours": 12.0,
     "race_date": "2026-09-20",
     "start_preference": "immediately",
@@ -16,7 +16,7 @@ VALID_PAYLOAD = {
     "gi_history": "occasional",
     "long_sessions": [
         {"duration_option": "2h_to_3h"},
-        {"duration_option": "over_4h"},
+        {"duration_option": "over_6h"},
     ],
 }
 
@@ -87,9 +87,9 @@ class TestGeneratePlan:
 
     def test_all_sport_types_are_accepted(self):
         sports = [
-            "marathon", "ultra_trail", "trail_running", "ironman", "half_ironman",
-            "triathlon_sprint_olympic", "gran_fondo", "cycling_endurance",
-            "hyrox", "spartan", "ocr", "duathlon", "swimrun",
+            "running", "triathlon",
+            "cycling",
+            "obstacle_race", "duathlon", "swimming",
         ]
         for sport in sports:
             payload = {**VALID_PAYLOAD, "sport_type": sport}
