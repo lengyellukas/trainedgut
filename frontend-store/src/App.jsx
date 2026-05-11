@@ -7,6 +7,7 @@ import YourFueling from './components/steps/YourFueling'
 import Review from './components/steps/Review'
 import PlanResult from './components/plan/PlanResult'
 import { generatePlan } from './api/client'
+import { FIELD_LIMITS } from './constants'
 import './styles/form.css'
 import './styles/plan.css'
 
@@ -42,9 +43,9 @@ function isStepValid(step, data) {
     case 0:
       return (
         !!data.gender &&
-        Number(data.age) >= 16 && Number(data.age) <= 85 &&
-        Number(data.body_weight_kg) >= 40 && Number(data.body_weight_kg) <= 150 &&
-        Number(data.height_cm) >= 140 && Number(data.height_cm) <= 220
+        Number(data.age) >= FIELD_LIMITS.age.min && Number(data.age) <= FIELD_LIMITS.age.max &&
+        Number(data.body_weight_kg) >= FIELD_LIMITS.body_weight_kg.min && Number(data.body_weight_kg) <= FIELD_LIMITS.body_weight_kg.max &&
+        Number(data.height_cm) >= FIELD_LIMITS.height_cm.min && Number(data.height_cm) <= FIELD_LIMITS.height_cm.max
       )
     case 1:
       if (!data.sport_type || !data.race_date || !data.target_race_time_hours || !data.start_preference) return false

@@ -9,19 +9,19 @@ function GelPackage({ pkg }) {
     <div className="gel-package">
       <div className="gel-package-title">Full Gel Package</div>
       <div className="gel-phase-row">
-        <span className="gel-phase-name">Phase 1 — 100% glucose</span>
+        <span className="gel-phase-name">Phase 1 - 100% glucose</span>
         <span className="gel-phase-count">
           {pkg.small_phase1_count}× small · {pkg.large_phase1_count}× large
         </span>
       </div>
       <div className="gel-phase-row">
-        <span className="gel-phase-name">Phase 2 — 2:1 ratio</span>
+        <span className="gel-phase-name">Phase 2 - 2:1 ratio</span>
         <span className="gel-phase-count">
           {pkg.small_phase2_count}× small · {pkg.large_phase2_count}× large
         </span>
       </div>
       <div className="gel-phase-row">
-        <span className="gel-phase-name">Phase 3 — 1:0.8 ratio</span>
+        <span className="gel-phase-name">Phase 3 - 1:0.8 ratio</span>
         <span className="gel-phase-count">
           {pkg.small_phase3_count}× small · {pkg.large_phase3_count}× large
         </span>
@@ -58,8 +58,8 @@ function LockedWeeks({ weeks }) {
         <span className="lock-icon">🔒</span>
         <div className="lock-title">{weeks.length} more weeks in your plan</div>
         <p className="lock-sub">
-          Your full {weeks.length + 1}-week protocol — including every session, every gel, and your
-          complete package — is ready. Unlock it to start training.
+          Your full {weeks.length + 1}-week protocol - including every session, every gel, and your
+          complete package - is ready. Unlock it to start training.
         </p>
         <button className="btn-unlock">Unlock full plan →</button>
       </div>
@@ -130,7 +130,7 @@ export default function PlanResult({ plan: response, onReset }) {
       </div>
 
       <div className="plan-body">
-        <p className="section-heading">Week 1 — Your first session</p>
+        <p className="section-heading">Week 1 - Your first session</p>
         <WeekCard week={week1} />
 
         {lockedWeeks.length > 0 && <LockedWeeks weeks={lockedWeeks} />}

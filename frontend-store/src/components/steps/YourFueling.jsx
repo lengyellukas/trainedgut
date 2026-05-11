@@ -8,19 +8,19 @@ const CARB_OPTIONS = [
   {
     value: 'occasional_one_gel',
     icon: '🟡',
-    label: 'Occasional — 1 gel',
+    label: 'Occasional - 1 gel',
     desc: 'You occasionally take a single gel (~20 g carbs/hr). It feels manageable.',
   },
   {
     value: 'regular_one_two',
     icon: '🟠',
-    label: 'Regular — 1–2 gels',
+    label: 'Regular - 1–2 gels',
     desc: 'You regularly take 1–2 gels per hour (~45 g carbs/hr) with no major issues.',
   },
   {
     value: 'comfortable_two_plus',
     icon: '🟢',
-    label: 'Comfortable — 2+ gels',
+    label: 'Comfortable - 2+ gels',
     desc: 'You comfortably handle 2 or more gels per hour (~70 g carbs/hr).',
   },
 ]
@@ -36,7 +36,7 @@ const GI_OPTIONS = [
     value: 'occasional',
     icon: '⚠️',
     label: 'Occasional issues',
-    desc: 'You sometimes experience GI discomfort — nausea or cramps — but not every session.',
+    desc: 'You sometimes experience GI discomfort - nausea or cramps - but not every session.',
   },
   {
     value: 'frequent',
@@ -72,7 +72,7 @@ export default function YourFueling({ data, update }) {
       <p className="step-eyebrow">Step 4 of 5</p>
       <h1 className="step-title">Your Fueling</h1>
       <p className="step-subtitle">
-        This tells us where to start your protocol. Be honest — starting too high causes GI distress,
+        This tells us where to start your protocol. Be honest - starting too high causes GI distress,
         starting too low just slows progress.
       </p>
 
@@ -83,6 +83,9 @@ export default function YourFueling({ data, update }) {
           selected={data.carb_tolerance_option}
           onSelect={v => update({ carb_tolerance_option: v })}
         />
+        {!data.carb_tolerance_option && (
+          <p className="field-error" style={{ marginTop: 8 }}>Select your current carb intake to continue.</p>
+        )}
       </div>
 
       <div>
@@ -92,6 +95,9 @@ export default function YourFueling({ data, update }) {
           selected={data.gi_history}
           onSelect={v => update({ gi_history: v })}
         />
+        {!data.gi_history && (
+          <p className="field-error" style={{ marginTop: 8 }}>Select your GI distress history to continue.</p>
+        )}
       </div>
     </div>
   )

@@ -1,14 +1,19 @@
+import { useState } from 'react'
+
 const DURATIONS = [
-  { value: '90min_to_2h', label: '90 min – 2 h',  windows: '2 fueling windows' },
-  { value: '2h_to_3h',   label: '2 – 3 h',        windows: '4 fueling windows' },
-  { value: '3h_to_4h',   label: '3 – 4 h',        windows: '6 fueling windows' },
-  { value: 'over_4h',    label: '4 h +',           windows: '8 fueling windows' },
+  { value: '90min_to_2h', label: '90 min – 2 h' },
+  { value: '2h_to_3h',   label: '2 – 3 h'       },
+  { value: '3h_to_4h',   label: '3 – 4 h'       },
+  { value: '4h_to_6h',   label: '4 – 6 h'       },
+  { value: 'over_6h',    label: '6 h +'          },
 ]
 
 export default function YourTraining({ data, update }) {
+  const [touched, setTouched] = useState(false)
   const sessions = data.long_sessions
 
   function addSession() {
+    setTouched(true)
     update({ long_sessions: [...sessions, { duration_option: '' }] })
   }
 
@@ -17,6 +22,7 @@ export default function YourTraining({ data, update }) {
   }
 
   function setDuration(index, value) {
+    setTouched(true)
     const updated = sessions.map((s, i) => i === index ? { ...s, duration_option: value } : s)
     update({ long_sessions: updated })
   }
@@ -26,7 +32,7 @@ export default function YourTraining({ data, update }) {
       <p className="step-eyebrow">Step 3 of 5</p>
       <h1 className="step-title">Your Training</h1>
       <p className="step-subtitle">
-        Which long sessions do you do each week? These are the only sessions where gut training matters —
+        Which long sessions do you do each week? These are the only sessions where gut training matters -
         we'll build your gel schedule around them.
       </p>
 
@@ -47,10 +53,14 @@ export default function YourTraining({ data, update }) {
                   onClick={() => setDuration(i, d.value)}
                 >
                   <div>{d.label}</div>
-                  <div style={{ fontSize: 10, opacity: 0.6, marginTop: 3 }}>{d.windows}</div>
                 </button>
               ))}
             </div>
+            {!session.duration_option && (
+              <p className="field-error" style={{ marginTop: 8 }}>
+                {touched ? 'Please select a duration for this session.' : 'Select a duration to continue.'}
+              </p>
+            )}
           </div>
         ))}
 
