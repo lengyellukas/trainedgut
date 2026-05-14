@@ -1,0 +1,27 @@
+name: Deploy landing page
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: PROD
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          protocol: ftp
+          server: ${{ secrets.LANDING_FTP_HOST }}
+          username: ${{ secrets.LANDING_FTP_USERNAME }}
+          password: ${{ secrets.LANDING_FTP_PASSWORD }}
+          server-dir: ${{ secrets.LANDING_TARGET_DIR }}
+          local-dir: frontend/
+          dangerous-clean-slate: true
