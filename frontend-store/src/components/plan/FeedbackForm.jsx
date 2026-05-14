@@ -16,14 +16,17 @@ const GI_OPTIONS = [
 
 export default function FeedbackForm({ email, weekNumber, sessionNumber }) {
   const [open, setOpen] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
+  const [submitted, setSubmitted] = useState(null)   // 'completed' | 'skipped' | null
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const [consumedVsPlan, setConsumedVsPlan] = useState('as_planned')
   const [giScale, setGiScale] = useState(0)
 
-  if (submitted) {
+  if (submitted === 'completed') {
     return <div className="feedback-done">Feedback submitted. Thank you!</div>
+  }
+  if (submitted === 'skipped') {
+    return <div className="feedback-done feedback-skipped">Marked as skipped — no adaptation logged for this session.</div>
   }
 
   if (!open) {
@@ -43,11 +46,30 @@ export default function FeedbackForm({ email, weekNumber, sessionNumber }) {
         email,
         week_number: weekNumber,
         session_number: sessionNumber,
+        status: 'completed',
         consumed_vs_plan: consumedVsPlan,
         consumed_ratio: consumed.ratio,
         gi_scale: giScale,
       })
-      setSubmitted(true)
+      setSubmitted('completed')
+    } catch {
+      setError('Could not submit. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  async function handleSkip() {
+    setSubmitting(true)
+    setError(null)
+    try {
+      await submitFeedback({
+        email,
+        week_number: weekNumber,
+        session_number: sessionNumber,
+        status: 'skipped',
+      })
+      setSubmitted('skipped')
     } catch {
       setError('Could not submit. Please try again.')
     } finally {
@@ -91,9 +113,14 @@ export default function FeedbackForm({ email, weekNumber, sessionNumber }) {
 
       {error && <p className="feedback-error">{error}</p>}
 
-      <button className="feedback-submit" onClick={handleSubmit} disabled={submitting}>
-        {submitting ? 'Submitting…' : 'Submit'}
-      </button>
+      <div className="feedback-actions">
+        <button className="feedback-submit" onClick={handleSubmit} disabled={submitting}>
+          {submitting ? 'Submitting…' : 'Submit'}
+        </button>
+        <button className="feedback-skip" onClick={handleSkip} disabled={submitting}>
+          Session did not happen
+        </button>
+      </div>
     </div>
   )
 }

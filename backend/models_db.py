@@ -73,6 +73,19 @@ class Session(Base):
     feedback: Mapped[list["Feedback"]] = relationship(back_populates="session")
 
 
+class ExtraSession(Base):
+    """An unplanned session the athlete completed in addition to the planned ones."""
+    __tablename__ = "extra_sessions"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=new_uuid)
+    week_id: Mapped[str] = mapped_column(String, ForeignKey("weeks.id"), nullable=False)
+    duration_option: Mapped[str] = mapped_column(String, nullable=False)
+    n_small_gels_consumed: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    n_large_gels_consumed: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    gi_scale: Mapped[int] = mapped_column(Integer, nullable=False)
+    submitted_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
 class Gel(Base):
     __tablename__ = "gels"
 
@@ -109,9 +122,10 @@ class Feedback(Base):
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=new_uuid)
     session_id: Mapped[str] = mapped_column(String, ForeignKey("sessions.id"), nullable=False)
-    consumed_vs_plan: Mapped[str] = mapped_column(String, nullable=False)  # less / as_planned / more
-    consumed_ratio: Mapped[float] = mapped_column(Float, nullable=False)
-    gi_scale: Mapped[int] = mapped_column(Integer, nullable=False)  # 0=none 1=mild 2=moderate 3=severe
+    status: Mapped[str] = mapped_column(String, nullable=False, default="completed")  # completed / skipped
+    consumed_vs_plan: Mapped[str | None] = mapped_column(String, nullable=True)  # less / as_planned / more
+    consumed_ratio: Mapped[float | None] = mapped_column(Float, nullable=True)
+    gi_scale: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 0=none 1=mild 2=moderate 3=severe
     submitted_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     session: Mapped["Session"] = relationship(back_populates="feedback")

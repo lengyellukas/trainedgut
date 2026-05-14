@@ -32,15 +32,15 @@ export default function YourTraining({ data, update }) {
       <p className="step-eyebrow">Step 3 of 5</p>
       <h1 className="step-title">Your Training</h1>
       <p className="step-subtitle">
-        Which long sessions do you do each week? These are the only sessions where gut training matters -
-        we'll build your gel schedule around them.
+        Which primary long sessions do you do in a typical training week? These are the sessions where gut training matters -
+        we'll build your gel schedule around them. You can log unplanned or skipped sessions later, week by week.
       </p>
 
       <div className="sessions-list">
         {sessions.map((session, i) => (
           <div key={i} className="session-card">
             <div className="session-header">
-              <span className="session-label">Long Session {i + 1}</span>
+              <span className="session-label">Primary Long Session {i + 1}</span>
               {sessions.length > 1 && (
                 <button className="btn-remove" onClick={() => removeSession(i)} title="Remove session">×</button>
               )}
@@ -65,7 +65,7 @@ export default function YourTraining({ data, update }) {
         ))}
 
         <button className="btn-add-session" onClick={addSession}>
-          + Add another long session
+          + Add another primary long session
         </button>
       </div>
     </div>

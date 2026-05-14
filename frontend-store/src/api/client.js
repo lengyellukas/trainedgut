@@ -42,3 +42,18 @@ export async function submitFeedback(payload) {
 
   return res.json()
 }
+
+export async function submitExtraSession(payload) {
+  const res = await fetch(`${API_BASE}/extra-session`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Server error ${res.status}: ${text}`)
+  }
+
+  return res.json()
+}

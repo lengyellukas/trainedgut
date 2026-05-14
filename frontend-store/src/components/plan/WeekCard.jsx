@@ -1,4 +1,5 @@
 import FeedbackForm from './FeedbackForm'
+import ExtraSessionForm from './ExtraSessionForm'
 
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
@@ -91,6 +92,10 @@ export default function WeekCard({ week, email }) {
             />
           </div>
         ))}
+
+        <div className="extra-session-wrap">
+          <ExtraSessionForm email={email} weekNumber={week.week_number} />
+        </div>
       </div>
     </div>
   )

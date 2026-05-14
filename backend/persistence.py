@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from protocol.models import Plan, GelRatio
 from protocol.inputs import AthleteProfile
-from models_db import Athlete, Plan as PlanDB, Week, Session as SessionDB, FuelingWindow, Gel, Feedback
+from models_db import Athlete, Plan as PlanDB, Week, Session as SessionDB, FuelingWindow, Gel, Feedback, ExtraSession
 
 GEL_RATIO_TO_PHASE = {
     GelRatio.GLUCOSE_100: 1,
@@ -99,15 +99,7 @@ def save_plan(db: Session, email: str, profile: AthleteProfile, plan: Plan) -> P
     return db_plan
 
 
-def save_feedback(
-    db: Session,
-    email: str,
-    week_number: int,
-    session_number: int,
-    consumed_vs_plan: str,
-    consumed_ratio: float,
-    gi_scale: int,
-) -> Feedback | None:
+def _resolve_week(db: Session, email: str, week_number: int) -> Week | None:
     athlete = db.query(Athlete).filter(Athlete.email == email).first()
     if not athlete:
         return None
@@ -121,7 +113,20 @@ def save_feedback(
     if not plan:
         return None
 
-    week = db.query(Week).filter(Week.plan_id == plan.id, Week.week_number == week_number).first()
+    return db.query(Week).filter(Week.plan_id == plan.id, Week.week_number == week_number).first()
+
+
+def save_feedback(
+    db: Session,
+    email: str,
+    week_number: int,
+    session_number: int,
+    status: str,
+    consumed_vs_plan: str | None,
+    consumed_ratio: float | None,
+    gi_scale: int | None,
+) -> Feedback | None:
+    week = _resolve_week(db, email, week_number)
     if not week:
         return None
 
@@ -134,6 +139,7 @@ def save_feedback(
 
     feedback = Feedback(
         session_id=session.id,
+        status=status,
         consumed_vs_plan=consumed_vs_plan,
         consumed_ratio=consumed_ratio,
         gi_scale=gi_scale,
@@ -141,3 +147,28 @@ def save_feedback(
     db.add(feedback)
     db.commit()
     return feedback
+
+
+def save_extra_session(
+    db: Session,
+    email: str,
+    week_number: int,
+    duration_option: str,
+    n_small_gels_consumed: int,
+    n_large_gels_consumed: int,
+    gi_scale: int,
+) -> ExtraSession | None:
+    week = _resolve_week(db, email, week_number)
+    if not week:
+        return None
+
+    extra = ExtraSession(
+        week_id=week.id,
+        duration_option=duration_option,
+        n_small_gels_consumed=n_small_gels_consumed,
+        n_large_gels_consumed=n_large_gels_consumed,
+        gi_scale=gi_scale,
+    )
+    db.add(extra)
+    db.commit()
+    return extra
