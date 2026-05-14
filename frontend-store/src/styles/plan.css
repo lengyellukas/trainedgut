@@ -223,55 +223,147 @@
   color: rgba(255,255,255,0.5);
 }
 
-/* ── LOCKED WEEKS ────────────────────────────────────────────── */
-.locked-weeks-section { margin-top: 40px; }
-
-.locked-weeks-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
+/* ── WEEK NAVIGATION ─────────────────────────────────────────── */
+.week-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 16px;
 }
 
-.locked-week-card {
-  background: var(--dark-2);
-  border-left: 3px solid rgba(255,255,255,0.06);
-  padding: 20px;
-  position: relative;
-  overflow: hidden;
-  user-select: none;
-  filter: blur(2px);
-  opacity: 0.5;
-}
-
-.locked-weeks-overlay {
-  margin-top: 24px;
-  background: rgba(26,26,20,0.7);
-  border: 1px solid rgba(255,255,255,0.06);
-  padding: 40px 32px;
-  text-align: center;
-  backdrop-filter: blur(4px);
-}
-
-.lock-icon {
-  font-size: 32px;
-  margin-bottom: 16px;
-  display: block;
-}
-.lock-title {
+.week-nav-label {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 28px;
-  color: var(--white);
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.5);
+  white-space: nowrap;
+}
+
+.week-nav-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.5);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.week-nav-btn:hover:not(:disabled) {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+.week-nav-btn:disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
+/* ── FEEDBACK FORM ───────────────────────────────────────────── */
+.feedback-toggle {
+  display: block;
+  margin-top: 16px;
+  background: none;
+  border: 1px dashed rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.3);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  padding: 10px 16px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: all 0.15s;
+}
+.feedback-toggle:hover {
+  border-color: rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.5);
+}
+
+.feedback-form {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--dark-3);
+  border-left: 2px solid rgba(255,255,255,0.08);
+}
+
+.feedback-title {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 14px;
+}
+
+.feedback-field { margin-bottom: 14px; }
+
+.feedback-label {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
   margin-bottom: 8px;
 }
-.lock-sub {
-  font-size: 13px;
-  color: rgba(255,255,255,0.4);
-  margin-bottom: 24px;
-  line-height: 1.6;
-  max-width: 440px;
-  margin-left: auto;
-  margin-right: auto;
+
+.feedback-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
+
+.feedback-opt {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.4);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.feedback-opt:hover {
+  border-color: rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.7);
+}
+.feedback-opt.selected {
+  border-color: var(--orange);
+  color: var(--orange);
+  background: rgba(218,82,34,0.08);
+}
+
+.feedback-submit {
+  margin-top: 4px;
+  background: none;
+  border: 1px solid var(--orange);
+  color: var(--orange);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.feedback-submit:hover:not(:disabled) {
+  background: var(--orange);
+  color: white;
+}
+.feedback-submit:disabled { opacity: 0.4; cursor: default; }
+
+.feedback-done {
+  margin-top: 16px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.05em;
+}
+
+.feedback-error {
+  font-size: 11px;
+  color: var(--danger);
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+/* ── TOO SHORT (kept btn-unlock for this only) ───────────────── */
 .btn-unlock {
   background: var(--orange);
   border: none;
@@ -367,6 +459,8 @@
   .plan-topbar { padding: 16px 20px; }
   .plan-header { padding: 32px 20px 24px; }
   .plan-body { padding: 0 20px 60px; }
-  .locked-weeks-grid { grid-template-columns: repeat(2, 1fr); }
   .week-stats { grid-template-columns: 1fr 1fr; }
+  .week-nav-btn { padding: 8px 14px; font-size: 11px; }
+  .feedback-options { flex-direction: column; }
+  .feedback-opt { text-align: center; }
 }

@@ -22,6 +22,7 @@ const STEPS = [
 const INITIAL_DATA = {
   // About You (height/gender are frontend-only - 3 not sent to backend)
   //TODO: send them to backend so they might be eventually used based on czech nutrionist
+  email: '',
   gender: '',
   age: '',
   height_cm: '',
@@ -43,6 +44,7 @@ function isStepValid(step, data) {
   switch (step) {
     case 0:
       return (
+        !!data.email && data.email.includes('@') && data.email.includes('.') &&
         !!data.gender &&
         Number(data.age) >= FIELD_LIMITS.age.min && Number(data.age) <= FIELD_LIMITS.age.max &&
         Number(data.body_weight_kg) >= FIELD_LIMITS.body_weight_kg.min && Number(data.body_weight_kg) <= FIELD_LIMITS.body_weight_kg.max &&
@@ -104,7 +106,7 @@ export default function App() {
   }
 
   if (plan) {
-    return <PlanResult plan={plan} onReset={handleReset} />
+    return <PlanResult plan={plan} email={data.email} onReset={handleReset} />
   }
 
   const stepComponents = [

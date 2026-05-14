@@ -40,7 +40,8 @@ export default function Review({ data, onGenerate, loading, error }) {
       <div className="review-grid">
         <div className="review-block">
           <p className="review-section-label">About You</p>
-          <Row label="Biological sex"  value={GENDER_LABELS[data.gender]} />
+          <Row label="Email"          value={data.email} />
+          <Row label="Biological sex" value={GENDER_LABELS[data.gender]} />
           <Row label="Age"     value={data.age ? `${data.age} yrs` : null} />
           <Row label="Weight"  value={data.body_weight_kg ? `${data.body_weight_kg} kg` : null} />
           <Row label="Height"  value={data.height_cm ? `${data.height_cm} cm` : null} />
@@ -78,7 +79,7 @@ export default function Review({ data, onGenerate, loading, error }) {
         {loading ? 'Building your plan…' : 'Generate my plan →'}
       </button>
       <p className="generate-note">
-        Week 1 is shown immediately · Full plan unlocked after purchase
+        Your full plan is shown immediately · Browse week by week · Leave session feedback
       </p>
     </div>
   )

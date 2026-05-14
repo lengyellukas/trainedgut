@@ -34,6 +34,21 @@ export default function AboutYou({ data, update }) {
         Your physical profile helps us calibrate the starting point and pacing of your gut training.
       </p>
 
+      {/* Email */}
+      <div className="field-group" style={{ marginBottom: 28 }}>
+        <label className="field-label">Email address</label>
+        <input
+          className={`field-input${touched.email && (!data.email || !data.email.includes('@')) ? ' field-input--error' : ''}`}
+          type="email"
+          placeholder="you@example.com"
+          value={data.email}
+          onChange={e => handleChange('email', e.target.value)}
+        />
+        {touched.email && (!data.email || !data.email.includes('@')) && (
+          <span className="field-error">Please enter a valid email address.</span>
+        )}
+      </div>
+
       {/* Biological sex */}
       <div style={{ marginBottom: 28 }}>
         <p className="field-label" style={{ marginBottom: 10 }}>Biological sex</p>

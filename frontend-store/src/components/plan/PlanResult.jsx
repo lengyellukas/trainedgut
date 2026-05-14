@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import WeekCard from './WeekCard'
 
 function formatDate(dateStr) {
@@ -9,19 +10,19 @@ function GelPackage({ pkg }) {
     <div className="gel-package">
       <div className="gel-package-title">Full Gel Package</div>
       <div className="gel-phase-row">
-        <span className="gel-phase-name">Phase 1 - 100% glucose</span>
+        <span className="gel-phase-name">Phase 1 — 100% glucose</span>
         <span className="gel-phase-count">
           {pkg.small_phase1_count}× small · {pkg.large_phase1_count}× large
         </span>
       </div>
       <div className="gel-phase-row">
-        <span className="gel-phase-name">Phase 2 - 2:1 ratio</span>
+        <span className="gel-phase-name">Phase 2 — 2:1 ratio</span>
         <span className="gel-phase-count">
           {pkg.small_phase2_count}× small · {pkg.large_phase2_count}× large
         </span>
       </div>
       <div className="gel-phase-row">
-        <span className="gel-phase-name">Phase 3 - 1:0.8 ratio</span>
+        <span className="gel-phase-name">Phase 3 — 1:0.8 ratio</span>
         <span className="gel-phase-count">
           {pkg.small_phase3_count}× small · {pkg.large_phase3_count}× large
         </span>
@@ -34,43 +35,11 @@ function GelPackage({ pkg }) {
   )
 }
 
-function LockedWeeks({ weeks }) {
-  if (weeks.length === 0) return null
-  return (
-    <div className="locked-weeks-section">
-      <p className="section-heading">Weeks 2 – {weeks.length + 1}</p>
-      <div className="locked-weeks-grid">
-        {weeks.map(week => (
-          <div key={week.week_number} className="locked-week-card">
-            <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 4 }}>
-              Week {week.week_number}
-            </div>
-            <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 18, color: 'white' }}>
-              {new Date(week.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--orange)', marginTop: 8 }}>
-              {week.target_carbs_per_hour_g} g/hr
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="locked-weeks-overlay">
-        <span className="lock-icon">🔒</span>
-        <div className="lock-title">{weeks.length} more weeks in your plan</div>
-        <p className="lock-sub">
-          Your full {weeks.length + 1}-week protocol - including every session, every gel, and your
-          complete package - is ready. Unlock it to start training.
-        </p>
-        <button className="btn-unlock">Unlock full plan →</button>
-      </div>
-    </div>
-  )
-}
+export default function PlanResult({ plan: response, email, onReset }) {
+  const [weekIdx, setWeekIdx] = useState(0)
 
-export default function PlanResult({ plan: response, onReset }) {
   if (!response) return null
 
-  // Loading is handled by App, so here response is always set
   if (response.status === 'too_short') {
     return (
       <div className="plan-shell">
@@ -89,7 +58,8 @@ export default function PlanResult({ plan: response, onReset }) {
   }
 
   const { plan } = response
-  const [week1, ...lockedWeeks] = plan.weeks
+  const totalWeeks = plan.weeks.length
+  const week = plan.weeks[weekIdx]
 
   return (
     <div className="plan-shell">
@@ -130,10 +100,25 @@ export default function PlanResult({ plan: response, onReset }) {
       </div>
 
       <div className="plan-body">
-        <p className="section-heading">Week 1 - Your first session</p>
-        <WeekCard week={week1} />
+        <div className="week-nav">
+          <button
+            className="week-nav-btn"
+            onClick={() => setWeekIdx(i => i - 1)}
+            disabled={weekIdx === 0}
+          >
+            ← Prev
+          </button>
+          <span className="week-nav-label">Week {weekIdx + 1} of {totalWeeks}</span>
+          <button
+            className="week-nav-btn"
+            onClick={() => setWeekIdx(i => i + 1)}
+            disabled={weekIdx === totalWeeks - 1}
+          >
+            Next →
+          </button>
+        </div>
 
-        {lockedWeeks.length > 0 && <LockedWeeks weeks={lockedWeeks} />}
+        <WeekCard week={week} email={email} />
 
         <GelPackage pkg={plan.gel_package} />
       </div>

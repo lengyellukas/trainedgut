@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from protocol.models import Plan, GelRatio
 from protocol.inputs import AthleteProfile
-from models_db import Athlete, Plan as PlanDB, Week, Session as SessionDB, FuelingWindow, Gel
+from models_db import Athlete, Plan as PlanDB, Week, Session as SessionDB, FuelingWindow, Gel, Feedback
 
 GEL_RATIO_TO_PHASE = {
     GelRatio.GLUCOSE_100: 1,
@@ -97,3 +97,47 @@ def save_plan(db: Session, email: str, profile: AthleteProfile, plan: Plan) -> P
 
     db.commit()
     return db_plan
+
+
+def save_feedback(
+    db: Session,
+    email: str,
+    week_number: int,
+    session_number: int,
+    consumed_vs_plan: str,
+    consumed_ratio: float,
+    gi_scale: int,
+) -> Feedback | None:
+    athlete = db.query(Athlete).filter(Athlete.email == email).first()
+    if not athlete:
+        return None
+
+    plan = (
+        db.query(PlanDB)
+        .filter(PlanDB.athlete_id == athlete.id, PlanDB.is_active == True)
+        .order_by(PlanDB.created_at.desc())
+        .first()
+    )
+    if not plan:
+        return None
+
+    week = db.query(Week).filter(Week.plan_id == plan.id, Week.week_number == week_number).first()
+    if not week:
+        return None
+
+    session = db.query(SessionDB).filter(
+        SessionDB.week_id == week.id,
+        SessionDB.session_number == session_number,
+    ).first()
+    if not session:
+        return None
+
+    feedback = Feedback(
+        session_id=session.id,
+        consumed_vs_plan=consumed_vs_plan,
+        consumed_ratio=consumed_ratio,
+        gi_scale=gi_scale,
+    )
+    db.add(feedback)
+    db.commit()
+    return feedback

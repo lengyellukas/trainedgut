@@ -1,13 +1,21 @@
+import FeedbackForm from './FeedbackForm'
+
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
 
 function formatDuration(opt) {
-  const map = { '90min_to_2h': '90 min–2 h', '2h_to_3h': '2–3 h', '3h_to_4h': '3–4 h', over_4h: '4 h+' }
+  const map = {
+    '90min_to_2h': '90 min–2 h',
+    '2h_to_3h':    '2–3 h',
+    '3h_to_4h':    '3–4 h',
+    '4h_to_6h':    '4–6 h',
+    'over_6h':     '6 h+',
+  }
   return map[opt] || opt
 }
 
-export default function WeekCard({ week }) {
+export default function WeekCard({ week, email }) {
   return (
     <div className="week-card">
       <div className="week-card-header">
@@ -75,6 +83,12 @@ export default function WeekCard({ week }) {
                 ))}
               </tbody>
             </table>
+
+            <FeedbackForm
+              email={email}
+              weekNumber={week.week_number}
+              sessionNumber={session.session_number}
+            />
           </div>
         ))}
       </div>
