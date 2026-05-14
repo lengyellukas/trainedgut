@@ -9,10 +9,12 @@ from protocol.generator import generate_plan
 
 app = FastAPI(title="TrainedGut API", version="0.1.0")
 
-# Permit all origins for now — tighten to the store domain before launch
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://trainedgut.store",
+        "http://localhost:5173",
+    ],
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
