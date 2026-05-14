@@ -14,7 +14,8 @@
       "Bash(kill %1)",
       "Bash(venv/bin/pytest *)",
       "Bash(npm install *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(venv/bin/python *)"
     ]
   }
 }
