@@ -9,7 +9,7 @@ from protocol.inputs import AthleteProfile
 from protocol.models import GeneratePlanResponse, PlanStatus
 from protocol.generator import generate_plan
 from database import get_db
-from persistence import save_plan, save_feedback, save_extra_session, find_or_create_athlete, list_extra_sessions, load_active_plan_response
+from persistence import save_plan, save_feedback, save_extra_session, find_or_create_athlete, list_extra_sessions, load_active_plan_response, delete_active_plan
 from auth import get_current_user
 
 app = FastAPI(title="TrainedGut API", version="0.1.0")
@@ -20,7 +20,7 @@ app.add_middleware(
         "https://trainedgut.store",
         "http://localhost:5173",
     ],
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "DELETE"],
     allow_headers=["*"],
 )
 
@@ -82,6 +82,17 @@ def get_active_plan_endpoint(
 ):
     """Reconstruct and return the user's active plan response from DB tables, or null."""
     return load_active_plan_response(db, supabase_user_id=user["sub"])
+
+
+@app.delete("/plan", status_code=204)
+def delete_active_plan_endpoint(
+    user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Delete the user's currently active plan (cascades to weeks/sessions/windows/feedback/extras)."""
+    if not delete_active_plan(db, supabase_user_id=user["sub"]):
+        raise HTTPException(status_code=404, detail="No active plan to delete")
+    return
 
 
 @app.post("/feedback", status_code=201)

@@ -26,6 +26,8 @@ async function request(method, path, body) {
     throw new Error(`Server error ${res.status}: ${text}`)
   }
 
+  // 204 No Content has no body
+  if (res.status === 204) return null
   return res.json()
 }
 
@@ -35,6 +37,10 @@ export async function getMe() {
 
 export async function getActivePlan() {
   return request('GET', '/plan')
+}
+
+export async function deleteActivePlan() {
+  return request('DELETE', '/plan')
 }
 
 export async function generatePlan(formData) {

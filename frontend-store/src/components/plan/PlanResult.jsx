@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import WeekCard from './WeekCard'
+import { currentWeekIndex, daysUntil } from '../../utils/dateAware'
 
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -35,8 +36,8 @@ function GelPackage({ pkg }) {
   )
 }
 
-export default function PlanResult({ plan: response, extraSessions = [], onExtrasChanged, onReset, onLogout }) {
-  const [weekIdx, setWeekIdx] = useState(0)
+export default function PlanResult({ plan: response, extraSessions = [], onExtrasChanged, onReset, onLogout, onCancel }) {
+  const [weekIdx, setWeekIdx] = useState(() => currentWeekIndex(response?.plan?.weeks))
 
   if (!response) return null
 
@@ -60,6 +61,9 @@ export default function PlanResult({ plan: response, extraSessions = [], onExtra
   const { plan } = response
   const totalWeeks = plan.weeks.length
   const week = plan.weeks[weekIdx]
+  const todayWeekIdx = currentWeekIndex(plan.weeks)
+  const isCurrentWeekDisplayed = weekIdx === todayWeekIdx
+  const daysToRace = daysUntil(plan.race_date)
 
   return (
     <div className="plan-shell">
@@ -98,6 +102,11 @@ export default function PlanResult({ plan: response, extraSessions = [], onExtra
           <div className="plan-meta-item">
             <span className="plan-meta-label">Race date</span>
             <span className="plan-meta-value" style={{ fontSize: 18, marginTop: 4 }}>{formatDate(plan.race_date)}</span>
+            {daysToRace > 0 && (
+              <span className="plan-meta-sub">in {daysToRace} {daysToRace === 1 ? 'day' : 'days'}</span>
+            )}
+            {daysToRace === 0 && <span className="plan-meta-sub">race day!</span>}
+            {daysToRace < 0 && <span className="plan-meta-sub">{-daysToRace} {-daysToRace === 1 ? 'day' : 'days'} ago</span>}
           </div>
         </div>
       </div>
@@ -111,7 +120,10 @@ export default function PlanResult({ plan: response, extraSessions = [], onExtra
           >
             ← Prev
           </button>
-          <span className="week-nav-label">Week {weekIdx + 1} of {totalWeeks}</span>
+          <span className="week-nav-label">
+            Week {weekIdx + 1} of {totalWeeks}
+            {isCurrentWeekDisplayed && <span className="week-nav-current"> · current</span>}
+          </span>
           <button
             className="week-nav-btn"
             onClick={() => setWeekIdx(i => i + 1)}
@@ -128,6 +140,18 @@ export default function PlanResult({ plan: response, extraSessions = [], onExtra
         />
 
         <GelPackage pkg={plan.gel_package} />
+
+        {onCancel && (
+          <div className="plan-cancel-zone">
+            <button className="btn-cancel-plan" onClick={onCancel}>
+              End plan early
+            </button>
+            <p className="plan-cancel-hint">
+              Ends the active plan and removes all session feedback and unplanned-session logs.
+              You can then generate a new plan.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

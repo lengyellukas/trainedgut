@@ -14,13 +14,21 @@ const GI_OPTIONS = [
   { value: 3, label: 'Severe' },
 ]
 
-export default function FeedbackForm({ weekNumber, sessionNumber }) {
+export default function FeedbackForm({ weekNumber, sessionNumber, disabled = false, availableAfter = null }) {
   const [open, setOpen] = useState(false)
   const [submitted, setSubmitted] = useState(null)   // 'completed' | 'skipped' | null
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const [consumedVsPlan, setConsumedVsPlan] = useState('as_planned')
   const [giScale, setGiScale] = useState(0)
+
+  if (disabled) {
+    return (
+      <div className="feedback-future">
+        Feedback available after {availableAfter} — session hasn't happened yet.
+      </div>
+    )
+  }
 
   if (submitted === 'completed') {
     return <div className="feedback-done">Feedback submitted. Thank you!</div>

@@ -5,7 +5,8 @@ No shared secret required — only the project URL.
 """
 import os
 
-from fastapi import Depends, Header, HTTPException
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 from jwt import PyJWKClient
 
@@ -16,17 +17,17 @@ ISSUER = f"{SUPABASE_URL}/auth/v1"
 # PyJWKClient caches keys internally and refreshes on cache miss
 _jwks_client = PyJWKClient(JWKS_URL)
 
+# Declares the Authorize button in Swagger UI
+bearer_scheme = HTTPBearer()
 
-def get_current_user(authorization: str = Header(default="")) -> dict:
+
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)) -> dict:
     """FastAPI dependency: verifies the Bearer JWT and returns the user claims.
 
     Returns dict with at least: 'sub' (supabase user id) and 'email'.
     Raises 401 on any failure.
     """
-    if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing Bearer token")
-
-    token = authorization.removeprefix("Bearer ").strip()
+    token = credentials.credentials
     try:
         signing_key = _jwks_client.get_signing_key_from_jwt(token).key
         claims = jwt.decode(

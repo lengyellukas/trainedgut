@@ -16,7 +16,7 @@ const GI_OPTIONS = [
   { value: 3, label: 'Severe' },
 ]
 
-export default function ExtraSessionForm({ weekNumber, onAdded }) {
+export default function ExtraSessionForm({ weekNumber, onAdded, disabled = false, availableAfter = null }) {
   const [open, setOpen] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -34,6 +34,14 @@ export default function ExtraSessionForm({ weekNumber, onAdded }) {
     setLargeGels(0)
     setGiScale(0)
     setError(null)
+  }
+
+  if (disabled) {
+    return (
+      <div className="extra-session-future">
+        Unplanned-session logging available after {availableAfter}.
+      </div>
+    )
   }
 
   if (submitted) {

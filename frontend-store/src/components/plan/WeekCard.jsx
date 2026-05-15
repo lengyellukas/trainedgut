@@ -1,5 +1,6 @@
 import FeedbackForm from './FeedbackForm'
 import ExtraSessionForm from './ExtraSessionForm'
+import { isWeekCurrent, isWeekFuture } from '../../utils/dateAware'
 
 const SMALL_GEL_CARBS = 25
 const LARGE_GEL_CARBS = 40
@@ -25,7 +26,14 @@ function formatLoggedAt(iso) {
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
 
+function formatStartDate(dateStr) {
+  return new Date(dateStr).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+}
+
 export default function WeekCard({ week, extraSessions = [], onExtrasChanged }) {
+  const isCurrent = isWeekCurrent(week)
+  const isFuture = isWeekFuture(week)
+
   return (
     <div className="week-card">
       <div className="week-card-header">
@@ -36,6 +44,7 @@ export default function WeekCard({ week, extraSessions = [], onExtrasChanged }) 
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
+          {isCurrent && <span className="week-badge current">Current</span>}
           {week.is_consolidation && <span className="week-badge hold">Hold Week</span>}
         </div>
       </div>
@@ -97,6 +106,8 @@ export default function WeekCard({ week, extraSessions = [], onExtrasChanged }) 
             <FeedbackForm
               weekNumber={week.week_number}
               sessionNumber={session.session_number}
+              disabled={isFuture}
+              availableAfter={isFuture ? formatStartDate(week.start_date) : null}
             />
           </div>
         ))}
@@ -130,7 +141,12 @@ export default function WeekCard({ week, extraSessions = [], onExtrasChanged }) 
         )}
 
         <div className="extra-session-wrap">
-          <ExtraSessionForm weekNumber={week.week_number} onAdded={onExtrasChanged} />
+          <ExtraSessionForm
+            weekNumber={week.week_number}
+            onAdded={onExtrasChanged}
+            disabled={isFuture}
+            availableAfter={isFuture ? formatStartDate(week.start_date) : null}
+          />
         </div>
       </div>
     </div>

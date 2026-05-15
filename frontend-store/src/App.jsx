@@ -9,7 +9,7 @@ import PlanResult from './components/plan/PlanResult'
 import AuthScreen from './components/AuthScreen'
 import MainMenu from './components/MainMenu'
 import ProfileView from './components/ProfileView'
-import { generatePlan, getMe, getExtraSessions, getActivePlan } from './api/client'
+import { generatePlan, getMe, getExtraSessions, getActivePlan, deleteActivePlan } from './api/client'
 import { FIELD_LIMITS } from './constants'
 import { supabase } from './supabase'
 import './styles/form.css'
@@ -125,6 +125,18 @@ export default function App() {
     setView('menu')
   }
 
+  async function handleCancelPlan() {
+    if (!window.confirm('End this plan early? All sessions, feedback and unplanned-session logs for this plan will be permanently removed.')) return
+    try {
+      await deleteActivePlan()
+      setPlan(null)
+      setExtraSessions([])
+      setView('menu')
+    } catch (err) {
+      alert(`Could not cancel the plan. ${err.message || ''}`)
+    }
+  }
+
   const update = useCallback(fields => setData(prev => ({ ...prev, ...fields })), [])
   const next = useCallback(() => setStep(s => Math.min(s + 1, STEPS.length - 1)), [])
   const back = useCallback(() => setStep(s => Math.max(s - 1, 0)), [])
@@ -207,6 +219,7 @@ export default function App() {
         onExtrasChanged={refreshExtraSessions}
         onReset={goToMenu}
         onLogout={handleLogout}
+        onCancel={handleCancelPlan}
       />
     )
   }

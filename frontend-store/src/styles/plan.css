@@ -96,6 +96,12 @@
   font-size: 11px;
   color: rgba(255,255,255,0.4);
 }
+.plan-meta-sub {
+  font-size: 11px;
+  color: var(--gold);
+  margin-top: 2px;
+  letter-spacing: 0.04em;
+}
 
 /* ── WEEK 1 CARD ─────────────────────────────────────────────── */
 .plan-body {
@@ -151,6 +157,11 @@
 }
 .week-badge.hold { color: var(--gold); }
 .week-badge.taper { color: rgba(255,255,255,0.4); }
+.week-badge.current {
+  background: var(--orange);
+  color: var(--white);
+  font-weight: 500;
+}
 
 .week-stats {
   display: grid;
@@ -238,6 +249,11 @@
   letter-spacing: 0.06em;
   color: rgba(255,255,255,0.5);
   white-space: nowrap;
+}
+.week-nav-current {
+  color: var(--orange);
+  font-size: 13px;
+  letter-spacing: 0.1em;
 }
 
 .week-nav-btn {
@@ -377,6 +393,16 @@
   letter-spacing: 0.05em;
 }
 .feedback-done.feedback-skipped { color: var(--gold); }
+
+.feedback-future {
+  margin-top: 16px;
+  padding: 10px 14px;
+  background: var(--dark-3);
+  border-left: 2px solid rgba(255,255,255,0.1);
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  font-style: italic;
+}
 
 .feedback-error {
   font-size: 11px;
@@ -552,6 +578,50 @@
   font-size: 12px;
   padding: 0;
   margin-left: 6px;
+}
+
+.extra-session-future {
+  padding: 12px 16px;
+  background: var(--dark-3);
+  border-left: 2px dashed rgba(255,255,255,0.08);
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  font-style: italic;
+}
+
+/* ── CANCEL PLAN ZONE ────────────────────────────────────────── */
+.plan-cancel-zone {
+  margin-top: 64px;
+  padding-top: 32px;
+  border-top: 1px dashed rgba(255,255,255,0.06);
+  text-align: center;
+}
+
+.btn-cancel-plan {
+  background: none;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 10px 24px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-cancel-plan:hover {
+  background: var(--danger);
+  color: white;
+}
+
+.plan-cancel-hint {
+  margin-top: 12px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  line-height: 1.5;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* ── TOO SHORT (kept btn-unlock for this only) ───────────────── */

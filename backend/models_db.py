@@ -27,7 +27,7 @@ class Plan(Base):
     __tablename__ = "plans"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=new_uuid)
-    athlete_id: Mapped[str] = mapped_column(String, ForeignKey("athletes.id"), nullable=False)
+    athlete_id: Mapped[str] = mapped_column(String, ForeignKey("athletes.id", ondelete="CASCADE"), nullable=False)
     sport_type: Mapped[str] = mapped_column(String, nullable=False)
     race_date: Mapped[str] = mapped_column(Date, nullable=False)
     target_race_time_hours: Mapped[float] = mapped_column(Float, nullable=False)
@@ -42,14 +42,14 @@ class Plan(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     athlete: Mapped["Athlete"] = relationship(back_populates="plans")
-    weeks: Mapped[list["Week"]] = relationship(back_populates="plan")
+    weeks: Mapped[list["Week"]] = relationship(back_populates="plan", cascade="all, delete", passive_deletes=True)
 
 
 class Week(Base):
     __tablename__ = "weeks"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=new_uuid)
-    plan_id: Mapped[str] = mapped_column(String, ForeignKey("plans.id"), nullable=False)
+    plan_id: Mapped[str] = mapped_column(String, ForeignKey("plans.id", ondelete="CASCADE"), nullable=False)
     week_number: Mapped[int] = mapped_column(Integer, nullable=False)
     start_date: Mapped[str] = mapped_column(Date, nullable=False)
     end_date: Mapped[str] = mapped_column(Date, nullable=False)
@@ -58,21 +58,21 @@ class Week(Base):
     is_consolidation: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     plan: Mapped["Plan"] = relationship(back_populates="weeks")
-    sessions: Mapped[list["Session"]] = relationship(back_populates="week")
+    sessions: Mapped[list["Session"]] = relationship(back_populates="week", cascade="all, delete", passive_deletes=True)
 
 
 class Session(Base):
     __tablename__ = "sessions"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=new_uuid)
-    week_id: Mapped[str] = mapped_column(String, ForeignKey("weeks.id"), nullable=False)
+    week_id: Mapped[str] = mapped_column(String, ForeignKey("weeks.id", ondelete="CASCADE"), nullable=False)
     session_number: Mapped[int] = mapped_column(Integer, nullable=False)
     duration_option: Mapped[str] = mapped_column(String, nullable=False)
     n_fueling_windows: Mapped[int] = mapped_column(Integer, nullable=False)
 
     week: Mapped["Week"] = relationship(back_populates="sessions")
-    fueling_windows: Mapped[list["FuelingWindow"]] = relationship(back_populates="session")
-    feedback: Mapped[list["Feedback"]] = relationship(back_populates="session")
+    fueling_windows: Mapped[list["FuelingWindow"]] = relationship(back_populates="session", cascade="all, delete", passive_deletes=True)
+    feedback: Mapped[list["Feedback"]] = relationship(back_populates="session", cascade="all, delete", passive_deletes=True)
 
 
 class ExtraSession(Base):
@@ -80,7 +80,7 @@ class ExtraSession(Base):
     __tablename__ = "extra_sessions"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=new_uuid)
-    week_id: Mapped[str] = mapped_column(String, ForeignKey("weeks.id"), nullable=False)
+    week_id: Mapped[str] = mapped_column(String, ForeignKey("weeks.id", ondelete="CASCADE"), nullable=False)
     duration_option: Mapped[str] = mapped_column(String, nullable=False)
     n_small_gels_consumed: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     n_large_gels_consumed: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
@@ -104,7 +104,7 @@ class FuelingWindow(Base):
     __tablename__ = "fueling_windows"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=new_uuid)
-    session_id: Mapped[str] = mapped_column(String, ForeignKey("sessions.id"), nullable=False)
+    session_id: Mapped[str] = mapped_column(String, ForeignKey("sessions.id", ondelete="CASCADE"), nullable=False)
     small_gel_id: Mapped[str | None] = mapped_column(String, ForeignKey("gels.id"), nullable=True)
     large_gel_id: Mapped[str | None] = mapped_column(String, ForeignKey("gels.id"), nullable=True)
     window_number: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -123,7 +123,7 @@ class Feedback(Base):
     __tablename__ = "feedback"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=new_uuid)
-    session_id: Mapped[str] = mapped_column(String, ForeignKey("sessions.id"), nullable=False)
+    session_id: Mapped[str] = mapped_column(String, ForeignKey("sessions.id", ondelete="CASCADE"), nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False, default="completed")  # completed / skipped
     consumed_vs_plan: Mapped[str | None] = mapped_column(String, nullable=True)  # less / as_planned / more
     consumed_ratio: Mapped[float | None] = mapped_column(Float, nullable=True)

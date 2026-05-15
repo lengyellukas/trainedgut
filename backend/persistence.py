@@ -201,6 +201,26 @@ def save_extra_session(
     return extra
 
 
+def delete_active_plan(db: Session, supabase_user_id: str) -> bool:
+    """Delete the user's currently active plan (and all cascaded children). Returns True if deleted."""
+    athlete = db.query(Athlete).filter(Athlete.supabase_user_id == supabase_user_id).first()
+    if not athlete:
+        return False
+
+    plan = (
+        db.query(PlanDB)
+        .filter(PlanDB.athlete_id == athlete.id, PlanDB.is_active == True)
+        .order_by(PlanDB.created_at.desc())
+        .first()
+    )
+    if not plan:
+        return False
+
+    db.delete(plan)
+    db.commit()
+    return True
+
+
 def list_extra_sessions(db: Session, supabase_user_id: str) -> list[dict]:
     """Return all extra sessions for the user's active plan, with week_number resolved."""
     athlete = db.query(Athlete).filter(Athlete.supabase_user_id == supabase_user_id).first()
