@@ -69,6 +69,7 @@ def _build_session(
 def _build_week(
     week_number: int,
     start_date: date,
+    end_date: date,
     target_carbs_per_hour_g: int,
     is_consolidation: bool,
     long_sessions: List[LongSession],
@@ -81,12 +82,31 @@ def _build_week(
     return Week(
         week_number=week_number,
         start_date=start_date,
-        end_date=start_date + timedelta(days=6),
+        end_date=end_date,
         target_carbs_per_hour_g=target_carbs_per_hour_g,
         gel_ratio=gel_ratio,
         is_consolidation=is_consolidation,
         sessions=sessions,
     )
+
+
+def _calendar_week_boundaries(plan_start: date, total_weeks: int) -> List[tuple[date, date]]:
+    """Return (start, end) date pairs aligned to Monday–Sunday calendar weeks.
+
+    Week 1 runs from `plan_start` to the next Sunday (1–7 days, depending on weekday).
+    Subsequent weeks always run Monday → Sunday.
+    """
+    # Python: Monday=0 ... Sunday=6. Days until the upcoming Sunday inclusive.
+    days_until_sunday = 6 - plan_start.weekday()
+    boundaries = [(plan_start, plan_start + timedelta(days=days_until_sunday))]
+
+    cursor = boundaries[0][1] + timedelta(days=1)  # Monday after the first partial week
+    for _ in range(total_weeks - 1):
+        end = cursor + timedelta(days=6)
+        boundaries.append((cursor, end))
+        cursor = end + timedelta(days=1)
+
+    return boundaries
 
 
 def _simulate_carb_progression(
@@ -173,8 +193,10 @@ def generate_plan(profile: AthleteProfile, today: date = None) -> GeneratePlanRe
     taper_weeks = min(config.TAPER_WEEKS, total_weeks // 4)
     carb_progression = _simulate_carb_progression(starting_carbs, total_weeks, taper_weeks)
 
+    boundaries = _calendar_week_boundaries(start_date, total_weeks)
+
     weeks: List[Week] = []
-    for i, target_carbs in enumerate(carb_progression):
+    for i, (target_carbs, (week_start, week_end)) in enumerate(zip(carb_progression, boundaries)):
         week_number = i + 1
         is_taper = week_number > total_weeks - taper_weeks
         # Consolidation weeks only apply outside the taper
@@ -184,7 +206,8 @@ def generate_plan(profile: AthleteProfile, today: date = None) -> GeneratePlanRe
         )
         week = _build_week(
             week_number=week_number,
-            start_date=start_date + timedelta(weeks=i),
+            start_date=week_start,
+            end_date=week_end,
             target_carbs_per_hour_g=target_carbs,
             is_consolidation=is_consolidation,
             long_sessions=profile.long_sessions,
