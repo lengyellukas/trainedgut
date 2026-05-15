@@ -16,7 +16,7 @@ const GI_OPTIONS = [
   { value: 3, label: 'Severe' },
 ]
 
-export default function ExtraSessionForm({ email, weekNumber }) {
+export default function ExtraSessionForm({ weekNumber, onAdded }) {
   const [open, setOpen] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -60,7 +60,6 @@ export default function ExtraSessionForm({ email, weekNumber }) {
     setError(null)
     try {
       await submitExtraSession({
-        email,
         week_number: weekNumber,
         duration_option: duration,
         n_small_gels_consumed: Number(smallGels) || 0,
@@ -68,6 +67,7 @@ export default function ExtraSessionForm({ email, weekNumber }) {
         gi_scale: giScale,
       })
       setSubmitted(true)
+      onAdded?.()
     } catch {
       setError('Could not submit. Please try again.')
     } finally {

@@ -40,7 +40,6 @@ export default function Review({ data, onGenerate, loading, error }) {
       <div className="review-grid">
         <div className="review-block">
           <p className="review-section-label">About You</p>
-          <Row label="Email"          value={data.email} />
           <Row label="Biological sex" value={GENDER_LABELS[data.gender]} />
           <Row label="Age"     value={data.age ? `${data.age} yrs` : null} />
           <Row label="Weight"  value={data.body_weight_kg ? `${data.body_weight_kg} kg` : null} />

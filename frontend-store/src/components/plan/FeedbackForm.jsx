@@ -14,7 +14,7 @@ const GI_OPTIONS = [
   { value: 3, label: 'Severe' },
 ]
 
-export default function FeedbackForm({ email, weekNumber, sessionNumber }) {
+export default function FeedbackForm({ weekNumber, sessionNumber }) {
   const [open, setOpen] = useState(false)
   const [submitted, setSubmitted] = useState(null)   // 'completed' | 'skipped' | null
   const [submitting, setSubmitting] = useState(false)
@@ -43,7 +43,6 @@ export default function FeedbackForm({ email, weekNumber, sessionNumber }) {
     const consumed = CONSUMED_OPTIONS.find(o => o.value === consumedVsPlan)
     try {
       await submitFeedback({
-        email,
         week_number: weekNumber,
         session_number: sessionNumber,
         status: 'completed',
@@ -64,7 +63,6 @@ export default function FeedbackForm({ email, weekNumber, sessionNumber }) {
     setError(null)
     try {
       await submitFeedback({
-        email,
         week_number: weekNumber,
         session_number: sessionNumber,
         status: 'skipped',

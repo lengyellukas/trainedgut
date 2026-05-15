@@ -1,8 +1,40 @@
+import { supabase } from '../supabase'
+
 const API_BASE = import.meta.env.VITE_API_URL
 
+async function authHeaders() {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session?.access_token) {
+    throw new Error('Not signed in')
+  }
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${session.access_token}`,
+  }
+}
+
+async function request(method, path, body) {
+  const headers = await authHeaders()
+  const res = await fetch(`${API_BASE}${path}`, {
+    method,
+    headers,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Server error ${res.status}: ${text}`)
+  }
+
+  return res.json()
+}
+
+export async function getMe() {
+  return request('GET', '/me')
+}
+
 export async function generatePlan(formData) {
-  const payload = {
-    email: formData.email,
+  return request('POST', '/generate-plan', {
     body_weight_kg: parseFloat(formData.body_weight_kg),
     sport_type: formData.sport_type,
     target_race_time_hours: parseFloat(formData.target_race_time_hours),
@@ -12,48 +44,17 @@ export async function generatePlan(formData) {
     carb_tolerance_option: formData.carb_tolerance_option,
     gi_history: formData.gi_history,
     long_sessions: formData.long_sessions.map(s => ({ duration_option: s.duration_option })),
-  }
-
-  const res = await fetch(`${API_BASE}/generate-plan`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
   })
-
-  if (!res.ok) {
-    const text = await res.text()
-    throw new Error(`Server error ${res.status}: ${text}`)
-  }
-
-  return res.json()
 }
 
 export async function submitFeedback(payload) {
-  const res = await fetch(`${API_BASE}/feedback`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
-
-  if (!res.ok) {
-    const text = await res.text()
-    throw new Error(`Server error ${res.status}: ${text}`)
-  }
-
-  return res.json()
+  return request('POST', '/feedback', payload)
 }
 
 export async function submitExtraSession(payload) {
-  const res = await fetch(`${API_BASE}/extra-session`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
+  return request('POST', '/extra-session', payload)
+}
 
-  if (!res.ok) {
-    const text = await res.text()
-    throw new Error(`Server error ${res.status}: ${text}`)
-  }
-
-  return res.json()
+export async function getExtraSessions() {
+  return request('GET', '/extra-sessions')
 }

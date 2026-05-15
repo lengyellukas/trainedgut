@@ -13,6 +13,7 @@ class Athlete(Base):
     __tablename__ = "athletes"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=new_uuid)
+    supabase_user_id: Mapped[str | None] = mapped_column(String, unique=True, nullable=True, index=True)
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     age: Mapped[int | None] = mapped_column(Integer, nullable=True)
     weight_kg: Mapped[float | None] = mapped_column(Float, nullable=True)

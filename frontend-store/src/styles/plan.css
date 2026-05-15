@@ -385,6 +385,79 @@
   margin-bottom: 4px;
 }
 
+/* ── UNPLANNED SESSIONS LIST ────────────────────────────────── */
+.unplanned-list {
+  margin-top: 24px;
+  padding: 16px 0 0;
+  border-top: 1px dashed rgba(255,255,255,0.06);
+}
+
+.unplanned-list-title {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+.unplanned-item {
+  background: var(--dark-3);
+  border-left: 2px solid var(--gold);
+  padding: 12px 16px;
+  margin-bottom: 8px;
+}
+.unplanned-item:last-child { margin-bottom: 0; }
+
+.unplanned-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.unplanned-badge {
+  background: var(--gold);
+  color: var(--dark);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  padding: 2px 8px;
+  font-weight: 500;
+}
+
+.unplanned-duration {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.05em;
+  color: var(--white);
+}
+
+.unplanned-logged {
+  margin-left: auto;
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 0.06em;
+}
+
+.unplanned-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+}
+
+.unplanned-carbs {
+  color: var(--orange);
+  margin-left: 4px;
+}
+
+.unplanned-gi {
+  color: rgba(255,255,255,0.4);
+}
+
 /* ── EXTRA SESSION FORM ──────────────────────────────────────── */
 .extra-session-wrap {
   margin-top: 24px;

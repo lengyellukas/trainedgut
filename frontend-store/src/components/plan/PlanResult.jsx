@@ -35,7 +35,7 @@ function GelPackage({ pkg }) {
   )
 }
 
-export default function PlanResult({ plan: response, email, onReset, onLogout }) {
+export default function PlanResult({ plan: response, extraSessions = [], onExtrasChanged, onReset, onLogout }) {
   const [weekIdx, setWeekIdx] = useState(0)
 
   if (!response) return null
@@ -66,7 +66,7 @@ export default function PlanResult({ plan: response, email, onReset, onLogout })
       <div className="plan-topbar">
         <span className="plan-topbar-logo">TrainedGut</span>
         <div style={{ display: 'flex', gap: 12 }}>
-          <button className="btn-reset" onClick={onReset}>← Start over</button>
+          <button className="btn-reset" onClick={onReset}>← Menu</button>
           {onLogout && <button className="btn-reset" onClick={onLogout}>Log out</button>}
         </div>
       </div>
@@ -121,7 +121,11 @@ export default function PlanResult({ plan: response, email, onReset, onLogout })
           </button>
         </div>
 
-        <WeekCard week={week} email={email} />
+        <WeekCard
+          week={week}
+          extraSessions={extraSessions.filter(es => es.week_number === week.week_number)}
+          onExtrasChanged={onExtrasChanged}
+        />
 
         <GelPackage pkg={plan.gel_package} />
       </div>

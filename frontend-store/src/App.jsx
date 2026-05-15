@@ -7,7 +7,9 @@ import YourFueling from './components/steps/YourFueling'
 import Review from './components/steps/Review'
 import PlanResult from './components/plan/PlanResult'
 import AuthScreen from './components/AuthScreen'
-import { generatePlan } from './api/client'
+import MainMenu from './components/MainMenu'
+import ProfileView from './components/ProfileView'
+import { generatePlan, getMe, getExtraSessions } from './api/client'
 import { FIELD_LIMITS } from './constants'
 import { supabase } from './supabase'
 import './styles/form.css'
@@ -24,7 +26,6 @@ const STEPS = [
 const INITIAL_DATA = {
   // About You (height/gender are frontend-only - 3 not sent to backend)
   //TODO: send them to backend so they might be eventually used based on czech nutrionist
-  email: '',
   gender: '',
   age: '',
   height_cm: '',
@@ -46,7 +47,6 @@ function isStepValid(step, data) {
   switch (step) {
     case 0:
       return (
-        !!data.email && data.email.includes('@') && data.email.includes('.') &&
         !!data.gender &&
         Number(data.age) >= FIELD_LIMITS.age.min && Number(data.age) <= FIELD_LIMITS.age.max &&
         Number(data.body_weight_kg) >= FIELD_LIMITS.body_weight_kg.min && Number(data.body_weight_kg) <= FIELD_LIMITS.body_weight_kg.max &&
@@ -68,6 +68,7 @@ function isStepValid(step, data) {
 }
 
 export default function App() {
+  const [view, setView] = useState('menu')        // 'menu' | 'form' | 'plan' | 'profile'
   const [step, setStep] = useState(0)
   const [data, setData] = useState(INITIAL_DATA)
   const [plan, setPlan] = useState(null)
@@ -75,6 +76,7 @@ export default function App() {
   const [error, setError] = useState(null)
   const [session, setSession] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
+  const [extraSessions, setExtraSessions] = useState([])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -87,16 +89,58 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
 
+  // After login, ping /me so the backend lazy-creates the athlete row + load extras
+  useEffect(() => {
+    if (!session) return
+    getMe().catch(err => console.error('getMe failed:', err))
+    refreshExtraSessions()
+  }, [session?.user?.id])
+
+  async function refreshExtraSessions() {
+    try {
+      setExtraSessions(await getExtraSessions())
+    } catch (err) {
+      console.error('getExtraSessions failed:', err)
+    }
+  }
+
   async function handleLogout() {
     await supabase.auth.signOut()
     setPlan(null)
     setStep(0)
     setData(INITIAL_DATA)
+    setView('menu')
+  }
+
+  function handleMenuSelect(target) {
+    if (target === 'form') setStep(0)
+    setView(target)
+  }
+
+  function goToMenu() {
+    setView('menu')
   }
 
   const update = useCallback(fields => setData(prev => ({ ...prev, ...fields })), [])
   const next = useCallback(() => setStep(s => Math.min(s + 1, STEPS.length - 1)), [])
   const back = useCallback(() => setStep(s => Math.max(s - 1, 0)), [])
+
+  // Enter key advances to next step (when valid and not on the Review step)
+  useEffect(() => {
+    if (view !== 'form') return
+    const isLastStep = step === STEPS.length - 1
+    if (isLastStep || !isStepValid(step, data)) return
+
+    function onKey(e) {
+      if (e.key !== 'Enter' || e.repeat) return
+      if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON') return
+      if (e.target.closest('.react-datepicker, .react-datepicker__input-container')) return
+      e.preventDefault()
+      next()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [view, step, data, next])
 
   async function handleGenerate() {
     setLoading(true)
@@ -104,6 +148,8 @@ export default function App() {
     try {
       const result = await generatePlan(data)
       setPlan(result)
+      setView('plan')
+      refreshExtraSessions()
     } catch (err) {
       setError('Could not reach the server. Make sure the backend is running on localhost:8000.')
     } finally {
@@ -111,11 +157,6 @@ export default function App() {
     }
   }
 
-  function handleReset() {
-    setPlan(null)
-    setStep(0)
-    setData(INITIAL_DATA)
-  }
 
   if (authLoading) {
     return (
@@ -139,10 +180,34 @@ export default function App() {
     )
   }
 
-  if (plan) {
-    return <PlanResult plan={plan} email={data.email} onReset={handleReset} onLogout={handleLogout} />
+  if (view === 'menu') {
+    return (
+      <MainMenu
+        email={session.user.email}
+        hasPlan={!!plan}
+        onSelect={handleMenuSelect}
+        onLogout={handleLogout}
+      />
+    )
   }
 
+  if (view === 'profile') {
+    return <ProfileView email={session.user.email} onBack={goToMenu} onLogout={handleLogout} />
+  }
+
+  if (view === 'plan') {
+    return (
+      <PlanResult
+        plan={plan}
+        extraSessions={extraSessions}
+        onExtrasChanged={refreshExtraSessions}
+        onReset={goToMenu}
+        onLogout={handleLogout}
+      />
+    )
+  }
+
+  // view === 'form'
   const stepComponents = [
     <AboutYou data={data} update={update} />,
     <YourRace data={data} update={update} />,
@@ -159,9 +224,10 @@ export default function App() {
       <header className="store-header">
         <span className="store-logo">Trained<span>Gut</span></span>
         <StepIndicator steps={STEPS} current={step} />
-        <button className="btn-logout" onClick={handleLogout} title={session.user.email}>
-          Log out
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn-logout" onClick={goToMenu}>← Menu</button>
+          <button className="btn-logout" onClick={handleLogout} title={session.user.email}>Log out</button>
+        </div>
       </header>
 
       <main className="store-main">

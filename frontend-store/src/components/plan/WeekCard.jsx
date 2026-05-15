@@ -1,6 +1,11 @@
 import FeedbackForm from './FeedbackForm'
 import ExtraSessionForm from './ExtraSessionForm'
 
+const SMALL_GEL_CARBS = 25
+const LARGE_GEL_CARBS = 40
+
+const GI_LABELS = { 0: 'No GI distress', 1: 'Mild GI', 2: 'Moderate GI', 3: 'Severe GI' }
+
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
@@ -16,7 +21,11 @@ function formatDuration(opt) {
   return map[opt] || opt
 }
 
-export default function WeekCard({ week, email }) {
+function formatLoggedAt(iso) {
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+}
+
+export default function WeekCard({ week, extraSessions = [], onExtrasChanged }) {
   return (
     <div className="week-card">
       <div className="week-card-header">
@@ -86,15 +95,42 @@ export default function WeekCard({ week, email }) {
             </table>
 
             <FeedbackForm
-              email={email}
               weekNumber={week.week_number}
               sessionNumber={session.session_number}
             />
           </div>
         ))}
 
+        {extraSessions.length > 0 && (
+          <div className="unplanned-list">
+            <p className="unplanned-list-title">Unplanned sessions ({extraSessions.length})</p>
+            {extraSessions.map(es => {
+              const totalCarbs = es.n_small_gels_consumed * SMALL_GEL_CARBS + es.n_large_gels_consumed * LARGE_GEL_CARBS
+              return (
+                <div key={es.id} className="unplanned-item">
+                  <div className="unplanned-row">
+                    <span className="unplanned-badge">UNPLANNED</span>
+                    <span className="unplanned-duration">{formatDuration(es.duration_option)}</span>
+                    <span className="unplanned-logged">logged {formatLoggedAt(es.submitted_at)}</span>
+                  </div>
+                  <div className="unplanned-meta">
+                    {es.n_large_gels_consumed > 0 && (
+                      <span className="gel-pill">{es.n_large_gels_consumed}× large (40g)</span>
+                    )}
+                    {es.n_small_gels_consumed > 0 && (
+                      <span className="gel-pill">{es.n_small_gels_consumed}× small (25g)</span>
+                    )}
+                    <span className="unplanned-carbs">{totalCarbs}g total</span>
+                    <span className="unplanned-gi">· {GI_LABELS[es.gi_scale] ?? es.gi_scale}</span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
         <div className="extra-session-wrap">
-          <ExtraSessionForm email={email} weekNumber={week.week_number} />
+          <ExtraSessionForm weekNumber={week.week_number} onAdded={onExtrasChanged} />
         </div>
       </div>
     </div>

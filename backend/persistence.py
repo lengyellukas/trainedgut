@@ -10,17 +10,34 @@ GEL_RATIO_TO_PHASE = {
 }
 
 
-def _get_or_create_athlete(db: Session, email: str, profile: AthleteProfile) -> Athlete:
-    athlete = db.query(Athlete).filter(Athlete.email == email).first()
+def find_or_create_athlete(db: Session, email: str, supabase_user_id: str | None = None) -> Athlete:
+    """Look up an athlete by Supabase user id (preferred) or email; create if missing."""
+    athlete = None
+    if supabase_user_id:
+        athlete = db.query(Athlete).filter(Athlete.supabase_user_id == supabase_user_id).first()
     if not athlete:
-        athlete = Athlete(
-            email=email,
-            age=getattr(profile, "age", None),
-            weight_kg=profile.body_weight_kg,
-            height_cm=getattr(profile, "height_cm", None),
-        )
+        athlete = db.query(Athlete).filter(Athlete.email == email).first()
+
+    if not athlete:
+        athlete = Athlete(email=email, supabase_user_id=supabase_user_id)
         db.add(athlete)
-        db.flush()
+        db.commit()
+        db.refresh(athlete)
+    elif supabase_user_id and not athlete.supabase_user_id:
+        # Backfill the supabase user id on an existing email-only row
+        athlete.supabase_user_id = supabase_user_id
+        db.commit()
+
+    return athlete
+
+
+def _get_or_create_athlete(db: Session, email: str, supabase_user_id: str | None, profile: AthleteProfile) -> Athlete:
+    athlete = find_or_create_athlete(db, email, supabase_user_id)
+    # Update biometric fields from the latest plan submission
+    athlete.age = getattr(profile, "age", None)
+    athlete.weight_kg = profile.body_weight_kg
+    athlete.height_cm = getattr(profile, "height_cm", None)
+    db.flush()
     return athlete
 
 
@@ -28,8 +45,8 @@ def _get_gel(db: Session, size: str, ratio_phase: int) -> Gel:
     return db.query(Gel).filter(Gel.size == size, Gel.ratio_phase == ratio_phase).one()
 
 
-def save_plan(db: Session, email: str, profile: AthleteProfile, plan: Plan) -> PlanDB:
-    athlete = _get_or_create_athlete(db, email, profile)
+def save_plan(db: Session, email: str, supabase_user_id: str | None, profile: AthleteProfile, plan: Plan) -> PlanDB:
+    athlete = _get_or_create_athlete(db, email, supabase_user_id, profile)
 
     gel_cache: dict[tuple, Gel] = {}
     def get_gel(size: str, phase: int) -> Gel:
@@ -99,8 +116,8 @@ def save_plan(db: Session, email: str, profile: AthleteProfile, plan: Plan) -> P
     return db_plan
 
 
-def _resolve_week(db: Session, email: str, week_number: int) -> Week | None:
-    athlete = db.query(Athlete).filter(Athlete.email == email).first()
+def _resolve_week(db: Session, supabase_user_id: str, week_number: int) -> Week | None:
+    athlete = db.query(Athlete).filter(Athlete.supabase_user_id == supabase_user_id).first()
     if not athlete:
         return None
 
@@ -118,7 +135,7 @@ def _resolve_week(db: Session, email: str, week_number: int) -> Week | None:
 
 def save_feedback(
     db: Session,
-    email: str,
+    supabase_user_id: str,
     week_number: int,
     session_number: int,
     status: str,
@@ -126,7 +143,7 @@ def save_feedback(
     consumed_ratio: float | None,
     gi_scale: int | None,
 ) -> Feedback | None:
-    week = _resolve_week(db, email, week_number)
+    week = _resolve_week(db, supabase_user_id, week_number)
     if not week:
         return None
 
@@ -151,14 +168,14 @@ def save_feedback(
 
 def save_extra_session(
     db: Session,
-    email: str,
+    supabase_user_id: str,
     week_number: int,
     duration_option: str,
     n_small_gels_consumed: int,
     n_large_gels_consumed: int,
     gi_scale: int,
 ) -> ExtraSession | None:
-    week = _resolve_week(db, email, week_number)
+    week = _resolve_week(db, supabase_user_id, week_number)
     if not week:
         return None
 
@@ -172,3 +189,40 @@ def save_extra_session(
     db.add(extra)
     db.commit()
     return extra
+
+
+def list_extra_sessions(db: Session, supabase_user_id: str) -> list[dict]:
+    """Return all extra sessions for the user's active plan, with week_number resolved."""
+    athlete = db.query(Athlete).filter(Athlete.supabase_user_id == supabase_user_id).first()
+    if not athlete:
+        return []
+
+    plan = (
+        db.query(PlanDB)
+        .filter(PlanDB.athlete_id == athlete.id, PlanDB.is_active == True)
+        .order_by(PlanDB.created_at.desc())
+        .first()
+    )
+    if not plan:
+        return []
+
+    rows = (
+        db.query(ExtraSession, Week.week_number)
+        .join(Week, ExtraSession.week_id == Week.id)
+        .filter(Week.plan_id == plan.id)
+        .order_by(ExtraSession.submitted_at)
+        .all()
+    )
+
+    return [
+        {
+            "id": es.id,
+            "week_number": week_number,
+            "duration_option": es.duration_option,
+            "n_small_gels_consumed": es.n_small_gels_consumed,
+            "n_large_gels_consumed": es.n_large_gels_consumed,
+            "gi_scale": es.gi_scale,
+            "submitted_at": es.submitted_at.isoformat(),
+        }
+        for es, week_number in rows
+    ]
