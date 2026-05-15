@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import StepIndicator from './components/StepIndicator'
 import AboutYou from './components/steps/AboutYou'
 import YourRace from './components/steps/YourRace'
@@ -6,8 +6,10 @@ import YourTraining from './components/steps/YourTraining'
 import YourFueling from './components/steps/YourFueling'
 import Review from './components/steps/Review'
 import PlanResult from './components/plan/PlanResult'
+import AuthScreen from './components/AuthScreen'
 import { generatePlan } from './api/client'
 import { FIELD_LIMITS } from './constants'
+import { supabase } from './supabase'
 import './styles/form.css'
 import './styles/plan.css'
 
@@ -71,6 +73,26 @@ export default function App() {
   const [plan, setPlan] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [session, setSession] = useState(null)
+  const [authLoading, setAuthLoading] = useState(true)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      setAuthLoading(false)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    setPlan(null)
+    setStep(0)
+    setData(INITIAL_DATA)
+  }
 
   const update = useCallback(fields => setData(prev => ({ ...prev, ...fields })), [])
   const next = useCallback(() => setStep(s => Math.min(s + 1, STEPS.length - 1)), [])
@@ -95,6 +117,18 @@ export default function App() {
     setData(INITIAL_DATA)
   }
 
+  if (authLoading) {
+    return (
+      <div className="loading-screen">
+        <div className="spinner" />
+      </div>
+    )
+  }
+
+  if (!session) {
+    return <AuthScreen />
+  }
+
   if (loading) {
     return (
       <div className="loading-screen">
@@ -106,7 +140,7 @@ export default function App() {
   }
 
   if (plan) {
-    return <PlanResult plan={plan} email={data.email} onReset={handleReset} />
+    return <PlanResult plan={plan} email={data.email} onReset={handleReset} onLogout={handleLogout} />
   }
 
   const stepComponents = [
@@ -125,6 +159,9 @@ export default function App() {
       <header className="store-header">
         <span className="store-logo">Trained<span>Gut</span></span>
         <StepIndicator steps={STEPS} current={step} />
+        <button className="btn-logout" onClick={handleLogout} title={session.user.email}>
+          Log out
+        </button>
       </header>
 
       <main className="store-main">

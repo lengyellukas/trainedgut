@@ -47,3 +47,65 @@ body {
 .text-gold  { color: var(--gold); }
 .text-orange { color: var(--orange); }
 .text-muted { color: rgba(255,255,255,0.4); }
+
+/* ── AUTH SCREEN ────────────────────────────────────────────── */
+.auth-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--dark);
+}
+
+.auth-header {
+  padding: 24px 40px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.auth-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--dark-2);
+  padding: 40px 32px;
+  border-left: 3px solid var(--orange);
+}
+
+.auth-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  letter-spacing: 0.04em;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+
+.auth-subtitle {
+  font-size: 13px;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+/* ── LOGOUT BUTTON (header) ─────────────────────────────────── */
+.btn-logout {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.4);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-logout:hover {
+  border-color: rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.7);
+}
