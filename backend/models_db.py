@@ -55,6 +55,7 @@ class Week(Base):
     end_date: Mapped[str] = mapped_column(Date, nullable=False)
     target_carbs_g_per_hour: Mapped[float] = mapped_column(Float, nullable=False)
     ratio_phase: Mapped[int] = mapped_column(Integer, nullable=False)
+    is_consolidation: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     plan: Mapped["Plan"] = relationship(back_populates="weeks")
     sessions: Mapped[list["Session"]] = relationship(back_populates="week")

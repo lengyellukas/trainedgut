@@ -1,5 +1,12 @@
-from sqlalchemy.orm import Session
-from protocol.models import Plan, GelRatio
+from datetime import date
+
+from sqlalchemy.orm import Session, joinedload
+from protocol.models import (
+    Plan, GelRatio, GeneratePlanResponse, PlanStatus,
+    Plan as PlanResponse, Week as WeekResponse,
+    Session as SessionResponse, FuelingWindow as FuelingWindowResponse,
+    GelPackageSummary,
+)
 from protocol.inputs import AthleteProfile
 from models_db import Athlete, Plan as PlanDB, Week, Session as SessionDB, FuelingWindow, Gel, Feedback, ExtraSession
 
@@ -8,6 +15,8 @@ GEL_RATIO_TO_PHASE = {
     GelRatio.RATIO_2_1:   2,
     GelRatio.RATIO_1_08:  3,
 }
+
+PHASE_TO_GEL_RATIO = {v: k for k, v in GEL_RATIO_TO_PHASE.items()}
 
 
 def find_or_create_athlete(db: Session, email: str, supabase_user_id: str | None = None) -> Athlete:
@@ -82,6 +91,7 @@ def save_plan(db: Session, email: str, supabase_user_id: str | None, profile: At
             end_date=week.end_date,
             target_carbs_g_per_hour=week.target_carbs_per_hour_g,
             ratio_phase=phase,
+            is_consolidation=week.is_consolidation,
         )
         db.add(db_week)
         db.flush()
@@ -226,3 +236,103 @@ def list_extra_sessions(db: Session, supabase_user_id: str) -> list[dict]:
         }
         for es, week_number in rows
     ]
+
+
+def load_active_plan_response(db: Session, supabase_user_id: str) -> GeneratePlanResponse | None:
+    """Reconstruct the full GeneratePlanResponse for the user's active plan from DB tables."""
+    athlete = db.query(Athlete).filter(Athlete.supabase_user_id == supabase_user_id).first()
+    if not athlete:
+        return None
+
+    plan_db = (
+        db.query(PlanDB)
+        .filter(PlanDB.athlete_id == athlete.id, PlanDB.is_active == True)
+        .order_by(PlanDB.created_at.desc())
+        .first()
+    )
+    if not plan_db:
+        return None
+
+    # Eager-load weeks → sessions → fueling_windows in one query tree
+    weeks_db = (
+        db.query(Week)
+        .filter(Week.plan_id == plan_db.id)
+        .options(joinedload(Week.sessions).joinedload(SessionDB.fueling_windows))
+        .order_by(Week.week_number)
+        .all()
+    )
+    if not weeks_db:
+        return None
+
+    weeks_response: list[WeekResponse] = []
+    pkg_counts = {f"small_phase{i}_count": 0 for i in (1, 2, 3)}
+    pkg_counts.update({f"large_phase{i}_count": 0 for i in (1, 2, 3)})
+
+    for week_db in weeks_db:
+        gel_ratio = PHASE_TO_GEL_RATIO[week_db.ratio_phase]
+        sessions_sorted = sorted(week_db.sessions, key=lambda s: s.session_number)
+
+        sessions_response: list[SessionResponse] = []
+        for s_db in sessions_sorted:
+            windows_sorted = sorted(s_db.fueling_windows, key=lambda w: w.window_number)
+            windows_response = [
+                FuelingWindowResponse(
+                    window_number=w.window_number,
+                    time_from_start_minutes=w.time_minutes,
+                    target_carbs_g=int(w.carbs_target_g),
+                    actual_carbs_g=int(w.carbs_actual_g),
+                    gel_count=w.n_small_gels + w.n_large_gels,
+                    n_large_gels=w.n_large_gels,
+                    n_small_gels=w.n_small_gels,
+                    gel_ratio=gel_ratio,
+                )
+                for w in windows_sorted
+            ]
+            for w in windows_sorted:
+                pkg_counts[f"small_phase{week_db.ratio_phase}_count"] += w.n_small_gels
+                pkg_counts[f"large_phase{week_db.ratio_phase}_count"] += w.n_large_gels
+
+            sessions_response.append(SessionResponse(
+                session_number=s_db.session_number,
+                duration_option=s_db.duration_option,
+                n_fueling_windows=s_db.n_fueling_windows,
+                carbs_per_hour_g=int(week_db.target_carbs_g_per_hour),
+                total_target_carbs_g=int(sum(w.carbs_target_g for w in windows_sorted)),
+                total_actual_carbs_g=int(sum(w.carbs_actual_g for w in windows_sorted)),
+                fueling_windows=windows_response,
+            ))
+
+        weeks_response.append(WeekResponse(
+            week_number=week_db.week_number,
+            start_date=week_db.start_date,
+            end_date=week_db.end_date,
+            target_carbs_per_hour_g=int(week_db.target_carbs_g_per_hour),
+            gel_ratio=gel_ratio,
+            is_consolidation=week_db.is_consolidation,
+            sessions=sessions_response,
+        ))
+
+    pkg_counts["total_gels"] = sum(pkg_counts.values())
+    gel_package = GelPackageSummary(**pkg_counts)
+
+    plan_response = PlanResponse(
+        athlete_body_weight_kg=athlete.weight_kg or 0.0,
+        sport_type=plan_db.sport_type,
+        race_date=plan_db.race_date,
+        starting_carbs_per_hour_g=int(weeks_db[0].target_carbs_g_per_hour),
+        race_target_carbs_per_hour_g=max(int(w.target_carbs_g_per_hour) for w in weeks_db),
+        total_weeks=len(weeks_db),
+        weeks=weeks_response,
+        gel_package=gel_package,
+    )
+
+    # Status: starts_late if start date hasn't arrived yet, else valid
+    today = date.today()
+    if plan_db.start_date > today:
+        status = PlanStatus.STARTS_LATE
+        message = f"Your plan starts on {plan_db.start_date.isoformat()}."
+    else:
+        status = PlanStatus.VALID
+        message = ""
+
+    return GeneratePlanResponse(status=status, status_message=message, plan=plan_response)

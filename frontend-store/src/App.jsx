@@ -9,7 +9,7 @@ import PlanResult from './components/plan/PlanResult'
 import AuthScreen from './components/AuthScreen'
 import MainMenu from './components/MainMenu'
 import ProfileView from './components/ProfileView'
-import { generatePlan, getMe, getExtraSessions } from './api/client'
+import { generatePlan, getMe, getExtraSessions, getActivePlan } from './api/client'
 import { FIELD_LIMITS } from './constants'
 import { supabase } from './supabase'
 import './styles/form.css'
@@ -89,11 +89,15 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // After login, ping /me so the backend lazy-creates the athlete row + load extras
+  // After login, ping /me so the backend lazy-creates the athlete row,
+  // then restore the active plan and any logged extras
   useEffect(() => {
     if (!session) return
     getMe().catch(err => console.error('getMe failed:', err))
     refreshExtraSessions()
+    getActivePlan()
+      .then(p => { if (p) setPlan(p) })
+      .catch(err => console.error('getActivePlan failed:', err))
   }, [session?.user?.id])
 
   async function refreshExtraSessions() {
@@ -151,7 +155,7 @@ export default function App() {
       setView('plan')
       refreshExtraSessions()
     } catch (err) {
-      setError('Could not reach the server. Make sure the backend is running on localhost:8000.')
+      setError(`Could not generate the plan. ${err.message || 'Unknown error.'}`)
     } finally {
       setLoading(false)
     }

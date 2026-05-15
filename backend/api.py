@@ -9,7 +9,7 @@ from protocol.inputs import AthleteProfile
 from protocol.models import GeneratePlanResponse, PlanStatus
 from protocol.generator import generate_plan
 from database import get_db
-from persistence import save_plan, save_feedback, save_extra_session, find_or_create_athlete, list_extra_sessions
+from persistence import save_plan, save_feedback, save_extra_session, find_or_create_athlete, list_extra_sessions, load_active_plan_response
 from auth import get_current_user
 
 app = FastAPI(title="TrainedGut API", version="0.1.0")
@@ -73,6 +73,15 @@ def generate_plan_endpoint(
         save_plan(db, email=user["email"], supabase_user_id=user["sub"], profile=request, plan=response.plan)
 
     return response
+
+
+@app.get("/plan", response_model=GeneratePlanResponse | None)
+def get_active_plan_endpoint(
+    user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Reconstruct and return the user's active plan response from DB tables, or null."""
+    return load_active_plan_response(db, supabase_user_id=user["sub"])
 
 
 @app.post("/feedback", status_code=201)

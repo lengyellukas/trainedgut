@@ -33,6 +33,10 @@ export async function getMe() {
   return request('GET', '/me')
 }
 
+export async function getActivePlan() {
+  return request('GET', '/plan')
+}
+
 export async function generatePlan(formData) {
   return request('POST', '/generate-plan', {
     body_weight_kg: parseFloat(formData.body_weight_kg),
