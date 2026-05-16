@@ -85,17 +85,28 @@ class TestPlanLength:
         numbers = [w.week_number for w in response.plan.weeks]
         assert numbers == list(range(1, len(numbers) + 1))
 
-    def test_week_dates_are_consecutive(self):
+    def test_each_week_starts_day_after_previous_ends(self):
+        """With calendar-aligned weeks, week N+1 starts the day after week N ends."""
+        from datetime import timedelta
         response = generate_plan(_make_profile(), today=TODAY)
         weeks = response.plan.weeks
         for i in range(1, len(weeks)):
-            assert weeks[i].start_date == weeks[i - 1].start_date + __import__("datetime").timedelta(days=7)
+            assert weeks[i].start_date == weeks[i - 1].end_date + timedelta(days=1)
 
-    def test_each_week_spans_7_days(self):
+    def test_weeks_after_first_are_full_monday_to_sunday(self):
+        """Calendar-aligned: weeks 2+ always run Mon-Sun (7 days, start=Mon, end=Sun)."""
         response = generate_plan(_make_profile(), today=TODAY)
-        for week in response.plan.weeks:
-            delta = (week.end_date - week.start_date).days
-            assert delta == 6  # start to end inclusive = 7 days
+        for week in response.plan.weeks[1:]:
+            assert (week.end_date - week.start_date).days == 6
+            assert week.start_date.weekday() == 0  # Monday
+            assert week.end_date.weekday() == 6    # Sunday
+
+    def test_first_week_ends_on_sunday(self):
+        """Calendar-aligned: first week always ends on a Sunday (length 1-7 days)."""
+        response = generate_plan(_make_profile(), today=TODAY)
+        first = response.plan.weeks[0]
+        assert first.end_date.weekday() == 6  # Sunday
+        assert 0 <= (first.end_date - first.start_date).days <= 6
 
 
 class TestCarbProgression:
