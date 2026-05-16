@@ -77,6 +77,7 @@ export default function App() {
   const [session, setSession] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [extraSessions, setExtraSessions] = useState([])
+  const [profile, setProfile] = useState(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -93,12 +94,20 @@ export default function App() {
   // then restore the active plan and any logged extras
   useEffect(() => {
     if (!session) return
-    getMe().catch(err => console.error('getMe failed:', err))
+    refreshProfile()
     refreshExtraSessions()
     getActivePlan()
       .then(p => { if (p) setPlan(p) })
       .catch(err => console.error('getActivePlan failed:', err))
   }, [session?.user?.id])
+
+  async function refreshProfile() {
+    try {
+      setProfile(await getMe())
+    } catch (err) {
+      console.error('getMe failed:', err)
+    }
+  }
 
   async function refreshExtraSessions() {
     try {
@@ -111,6 +120,8 @@ export default function App() {
   async function handleLogout() {
     await supabase.auth.signOut()
     setPlan(null)
+    setProfile(null)
+    setExtraSessions([])
     setStep(0)
     setData(INITIAL_DATA)
     setView('menu')
@@ -166,6 +177,7 @@ export default function App() {
       setPlan(result)
       setView('plan')
       refreshExtraSessions()
+      refreshProfile()
     } catch (err) {
       setError(`Could not generate the plan. ${err.message || 'Unknown error.'}`)
     } finally {
@@ -208,7 +220,7 @@ export default function App() {
   }
 
   if (view === 'profile') {
-    return <ProfileView email={session.user.email} onBack={goToMenu} onLogout={handleLogout} />
+    return <ProfileView email={session.user.email} profile={profile} onBack={goToMenu} onLogout={handleLogout} />
   }
 
   if (view === 'plan') {
