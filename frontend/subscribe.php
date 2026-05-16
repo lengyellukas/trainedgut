@@ -1,6 +1,6 @@
 <?php
 /**
- * TrainedGut.com — Email Subscription Handler
+ * TrainedGut.com - Email Subscription Handler
  * 
  * SETUP INSTRUCTIONS (do this once in WebSupport WebAdmin):
  * 1. Go to WebAdmin → Databases → Create new database
@@ -67,8 +67,8 @@ $stmt = $pdo->prepare("SELECT id FROM subscribers WHERE email = ?");
 $stmt->execute([$email]);
 
 if ($stmt->fetch()) {
-    // Already subscribed — return success silently (don't expose data)
-    echo json_encode(['success' => true, 'message' => 'You\'re already on the list — we\'ll be in touch before launch.']);
+    // Already subscribed - return success silently (don't expose data)
+    echo json_encode(['success' => true, 'message' => 'You\'re already subscribed - check your inbox for the discount code.']);
     exit;
 }
 
@@ -89,7 +89,7 @@ try {
 }
 
 // Send notification email to you
-$subject = SITE_NAME . ' — New Early Access Signup';
+$subject = SITE_NAME . ' - New newsletter subscriber';
 $body    = "New signup on TrainedGut.com\n\n"
          . "Email: {$email}\n"
          . "Time:  " . date('Y-m-d H:i:s') . "\n"
@@ -103,14 +103,15 @@ $headers .= "X-Mailer: PHP/" . phpversion();
 mail(NOTIFY_EMAIL, $subject, $body, $headers);
 
 // Send confirmation email to subscriber
-$confirm_subject = "You're on the list — " . SITE_NAME;
+$confirm_subject = "Your 10% off " . SITE_NAME . " - welcome";
 $confirm_body    = "Hi,\n\n"
-                 . "You're registered for early access to TrainedGut - the world's first\n"
-                 . "personalised gut-training program for endurance athletes.\n\n"
-                 . "We'll be in touch before launch with exclusive early pricing.\n\n"
-                 . "In the meantime, if you have any questions, reply to this email.\n\n"
-                 . "Train your gut, fuel your race\n"
-                 . "The TrainedGut Team\n"
+                 . "Thanks for signing up. Here's your 10% discount code for your first personalised gut training plan:\n\n"
+                 . "    GUT10\n\n"
+                 . "Apply it at checkout on trainedgut.store. Works on any plan length and any race type.\n\n"
+                 . "What you signed up for: roughly one email per month with research summaries on carbohydrate absorption and gut adaptation, plus updates as the protocol is refined with our sports nutritionist. No spam, ever.\n\n"
+                 . "If gut training is new to you, the 30-second version: during efforts over 2 hours, carbohydrate availability - not fitness - becomes the limiter on performance. Your gut's carb transporters (SGLT1, GLUT5) adapt to repeated high-carb exposure. TrainedGut is a progressive 8-20 week protocol that trains them, week by week, around your specific race.\n\n"
+                 . "Ready when you are: https://trainedgut.store\n\n"
+                 . "- The TrainedGut team\n"
                  . "trainedgut.com";
 
 $confirm_headers  = "From: " . SITE_NAME . " <" . FROM_EMAIL . ">\r\n";
@@ -122,5 +123,5 @@ mail($email, $confirm_subject, $confirm_body, $confirm_headers);
 // Success
 echo json_encode([
     'success' => true,
-    'message' => 'You\'re on the list. Watch your inbox — we launch soon.'
+    'message' => 'Welcome! Check your inbox for your 10% discount code.'
 ]);
