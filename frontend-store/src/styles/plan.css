@@ -234,6 +234,17 @@
   color: rgba(255,255,255,0.5);
 }
 
+.overshoot-pill {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  font-size: 10px;
+  background: rgba(200,150,62,0.15);
+  color: var(--gold);
+  border: 1px solid rgba(200,150,62,0.3);
+  cursor: help;
+}
+
 /* ── WEEK NAVIGATION ─────────────────────────────────────────── */
 .week-nav {
   display: flex;
@@ -652,17 +663,32 @@
   color: var(--gold);
   margin-bottom: 20px;
 }
+.gel-phase-block {
+  margin-bottom: 16px;
+}
+.gel-phase-block:last-of-type { margin-bottom: 0; }
+
+.gel-phase-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
 .gel-phase-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 0;
+  padding: 6px 0;
   border-bottom: 1px solid rgba(255,255,255,0.04);
   font-size: 13px;
 }
 .gel-phase-row:last-child { border-bottom: none; }
-.gel-phase-name { color: rgba(255,255,255,0.5); }
-.gel-phase-count { color: var(--white); font-weight: 400; }
+
+.gel-phase-product { color: rgba(255,255,255,0.6); }
+.gel-phase-count { color: var(--white); font-weight: 500; }
 .gel-total-row {
   margin-top: 12px;
   padding-top: 12px;

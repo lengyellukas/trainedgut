@@ -66,10 +66,10 @@ function OptionList({ options, selected, onSelect }) {
   )
 }
 
-export default function YourFueling({ data, update }) {
+export default function YourFueling({ data, update, stepNumber, totalSteps }) {
   return (
     <div className="step-content">
-      <p className="step-eyebrow">Step 4 of 5</p>
+      <p className="step-eyebrow">Step {stepNumber} of {totalSteps}</p>
       <h1 className="step-title">Your Fueling</h1>
       <p className="step-subtitle">
         This tells us where to start your protocol. Be honest - starting too high causes GI distress,

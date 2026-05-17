@@ -17,14 +17,32 @@ class GelRatio(str, Enum):
     RATIO_1_08 = "56% glucose / 44% fructose (1:0.8)"
 
 
+class GelOption(BaseModel):
+    """A single available gel product (a row from the gels catalogue)."""
+    id: str               # opaque identifier (Gel.id when sourced from DB)
+    brand: str
+    carbs_g: int
+    size_label: str       # 'small' / 'large' / etc — descriptive only
+    ratio_phase: int      # 1, 2, or 3
+
+
+class GelEntry(BaseModel):
+    """One product + how many to consume in a window or across the plan."""
+    gel_id: str
+    brand: str
+    carbs_g: int
+    size_label: str
+    quantity: int
+
+
 class FuelingWindow(BaseModel):
     window_number: int
     time_from_start_minutes: int
-    target_carbs_g: int
-    actual_carbs_g: int       # may exceed target — whole gels only, never half
-    gel_count: int
-    n_large_gels: int         # 40g gels
-    n_small_gels: int         # 25g gels
+    target_carbs_g: int       # what the protocol asks for
+    actual_carbs_g: int       # what the chosen gels actually deliver (>= target)
+    overshoot_g: int          # actual - target
+    gel_count: int            # total gels consumed in this window
+    gels: List[GelEntry]      # which specific gels and how many
     gel_ratio: GelRatio
 
 
@@ -48,14 +66,18 @@ class Week(BaseModel):
     sessions: List[Session]
 
 
+class GelPackageItem(BaseModel):
+    """One line in the package summary: how many of one specific product to order."""
+    gel_id: str
+    brand: str
+    size_label: str
+    carbs_g: int
+    ratio_phase: int
+    quantity: int
+
+
 class GelPackageSummary(BaseModel):
-    # Six SKUs: three phases × two sizes
-    small_phase1_count: int    # 25g, 100% glucose
-    large_phase1_count: int    # 40g, 100% glucose
-    small_phase2_count: int    # 25g, 2:1 ratio
-    large_phase2_count: int    # 40g, 2:1 ratio
-    small_phase3_count: int    # 25g, 1:0.8 ratio
-    large_phase3_count: int    # 40g, 1:0.8 ratio
+    items: List[GelPackageItem]   # one entry per distinct product used in the plan
     total_gels: int
 
 

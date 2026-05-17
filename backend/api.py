@@ -9,7 +9,7 @@ from protocol.inputs import AthleteProfile
 from protocol.models import GeneratePlanResponse, PlanStatus
 from protocol.generator import generate_plan
 from database import get_db
-from persistence import save_plan, save_feedback, save_extra_session, find_or_create_athlete, list_extra_sessions, load_active_plan_response, delete_active_plan
+from persistence import save_plan, save_feedback, save_extra_session, find_or_create_athlete, list_extra_sessions, load_active_plan_response, delete_active_plan, load_gel_options
 from auth import get_current_user
 
 app = FastAPI(title="TrainedGut API", version="0.1.0")
@@ -67,7 +67,8 @@ def generate_plan_endpoint(
     user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    response = generate_plan(request, today=date.today())
+    available_gels = load_gel_options(db, brand=request.gel_brand.value, market=request.market.value if request.market else None)
+    response = generate_plan(request, available_gels=available_gels, today=date.today())
 
     if response.status != PlanStatus.TOO_SHORT:
         save_plan(db, email=user["email"], supabase_user_id=user["sub"], profile=request, plan=response.plan)

@@ -92,11 +92,13 @@ class Gel(Base):
     __tablename__ = "gels"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=new_uuid)
+    brand: Mapped[str] = mapped_column(String, nullable=False, default="trainedgut", index=True)
     size: Mapped[str] = mapped_column(String, nullable=False)
     carbs_g: Mapped[int] = mapped_column(Integer, nullable=False)
     glucose_pct: Mapped[float] = mapped_column(Float, nullable=False)
     fructose_pct: Mapped[float] = mapped_column(Float, nullable=False)
     ratio_phase: Mapped[int] = mapped_column(Integer, nullable=False)
+    markets: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
 
 
 
@@ -105,18 +107,28 @@ class FuelingWindow(Base):
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=new_uuid)
     session_id: Mapped[str] = mapped_column(String, ForeignKey("sessions.id", ondelete="CASCADE"), nullable=False)
-    small_gel_id: Mapped[str | None] = mapped_column(String, ForeignKey("gels.id"), nullable=True)
-    large_gel_id: Mapped[str | None] = mapped_column(String, ForeignKey("gels.id"), nullable=True)
     window_number: Mapped[int] = mapped_column(Integer, nullable=False)
     time_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
     carbs_target_g: Mapped[float] = mapped_column(Float, nullable=False)
     carbs_actual_g: Mapped[float] = mapped_column(Float, nullable=False)
-    n_small_gels: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    n_large_gels: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     session: Mapped["Session"] = relationship(back_populates="fueling_windows")
-    small_gel: Mapped["Gel | None"] = relationship(foreign_keys=[small_gel_id])
-    large_gel: Mapped["Gel | None"] = relationship(foreign_keys=[large_gel_id])
+    gel_entries: Mapped[list["FuelingWindowGel"]] = relationship(
+        back_populates="fueling_window", cascade="all, delete", passive_deletes=True
+    )
+
+
+class FuelingWindowGel(Base):
+    """Junction: which gels (and how many of each) are used in one window."""
+    __tablename__ = "fueling_window_gels"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=new_uuid)
+    window_id: Mapped[str] = mapped_column(String, ForeignKey("fueling_windows.id", ondelete="CASCADE"), nullable=False)
+    gel_id: Mapped[str] = mapped_column(String, ForeignKey("gels.id"), nullable=False)
+    quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    fueling_window: Mapped["FuelingWindow"] = relationship(back_populates="gel_entries")
+    gel: Mapped["Gel"] = relationship()
 
 
 class Feedback(Base):

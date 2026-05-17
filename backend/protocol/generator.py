@@ -4,7 +4,7 @@ from typing import List
 from . import config
 from .inputs import AthleteProfile, LongSession
 from .models import (
-    FuelingWindow, GelRatio, GeneratePlanResponse,
+    FuelingWindow, GelOption, GelRatio, GeneratePlanResponse,
     Plan, PlanStatus, Session, Week,
 )
 from .calculator import (
@@ -23,20 +23,33 @@ def _gel_ratio_for_week(week_number: int) -> GelRatio:
     return GelRatio.RATIO_1_08
 
 
+def _ratio_to_phase(ratio: GelRatio) -> int:
+    if ratio == GelRatio.GLUCOSE_100:
+        return 1
+    if ratio == GelRatio.RATIO_2_1:
+        return 2
+    return 3
+
+
 def _build_fueling_window(
     window_number: int,
     target_carbs_g: int,
     gel_ratio: GelRatio,
+    available_gels: List[GelOption],
 ) -> FuelingWindow:
-    gel = select_gels(target_carbs_g)
+    phase = _ratio_to_phase(gel_ratio)
+    options = [g for g in available_gels if g.ratio_phase == phase]
+    gels = select_gels(target_carbs_g, options)
+    actual = sum(g.carbs_g * g.quantity for g in gels)
+    gel_count = sum(g.quantity for g in gels)
     return FuelingWindow(
         window_number=window_number,
         time_from_start_minutes=calculate_fueling_window_time(window_number),
         target_carbs_g=target_carbs_g,
-        actual_carbs_g=gel.actual_carbs_g,
-        gel_count=gel.n_large + gel.n_small,
-        n_large_gels=gel.n_large,
-        n_small_gels=gel.n_small,
+        actual_carbs_g=actual,
+        overshoot_g=actual - target_carbs_g,
+        gel_count=gel_count,
+        gels=gels,
         gel_ratio=gel_ratio,
     )
 
@@ -46,12 +59,13 @@ def _build_session(
     long_session: LongSession,
     target_carbs_per_hour_g: int,
     gel_ratio: GelRatio,
+    available_gels: List[GelOption],
 ) -> Session:
     n_windows = n_fueling_windows(long_session.duration_option)
     carbs_per_window = calculate_carbs_per_window(target_carbs_per_hour_g)
 
     windows = [
-        _build_fueling_window(i + 1, carbs_per_window, gel_ratio)
+        _build_fueling_window(i + 1, carbs_per_window, gel_ratio, available_gels)
         for i in range(n_windows)
     ]
 
@@ -73,10 +87,11 @@ def _build_week(
     target_carbs_per_hour_g: int,
     is_consolidation: bool,
     long_sessions: List[LongSession],
+    available_gels: List[GelOption],
 ) -> Week:
     gel_ratio = _gel_ratio_for_week(week_number)
     sessions = [
-        _build_session(i + 1, ls, target_carbs_per_hour_g, gel_ratio)
+        _build_session(i + 1, ls, target_carbs_per_hour_g, gel_ratio, available_gels)
         for i, ls in enumerate(long_sessions)
     ]
     return Week(
@@ -151,9 +166,23 @@ def _simulate_carb_progression(
     return carbs
 
 
-def generate_plan(profile: AthleteProfile, today: date = None) -> GeneratePlanResponse:
+def generate_plan(
+    profile: AthleteProfile,
+    available_gels: List[GelOption],
+    today: date = None,
+) -> GeneratePlanResponse:
     if today is None:
         today = date.today()
+
+    if not available_gels:
+        return GeneratePlanResponse(
+            status=PlanStatus.TOO_SHORT,
+            status_message=(
+                f"No gels available for brand '{profile.gel_brand.value}'"
+                + (f" in market '{profile.market.value}'." if profile.market else ".")
+                + " Pick a different brand or market."
+            ),
+        )
 
     start_date = calculate_start_date(
         profile.start_preference,
@@ -171,6 +200,24 @@ def generate_plan(profile: AthleteProfile, today: date = None) -> GeneratePlanRe
                 f"Only {total_weeks} week(s) until your race. "
                 f"A minimum of {config.ABSOLUTE_MINIMUM_WEEKS_TO_RACE} weeks is needed "
                 "to begin gut training."
+            ),
+        )
+
+    # Check the chosen brand has gels for every phase the plan will actually use.
+    needed_phases = {1}
+    if total_weeks > config.RATIO_PHASE_1_UNTIL_WEEK:
+        needed_phases.add(2)
+    if total_weeks > config.RATIO_PHASE_2_UNTIL_WEEK:
+        needed_phases.add(3)
+    available_phases = {g.ratio_phase for g in available_gels}
+    missing = sorted(needed_phases - available_phases)
+    if missing:
+        return GeneratePlanResponse(
+            status=PlanStatus.TOO_SHORT,
+            status_message=(
+                f"Brand '{profile.gel_brand.value}' has no gels for ratio phase(s) "
+                f"{', '.join(map(str, missing))} which this {total_weeks}-week plan needs. "
+                "Pick a different brand or shorten the plan."
             ),
         )
 
@@ -211,6 +258,7 @@ def generate_plan(profile: AthleteProfile, today: date = None) -> GeneratePlanRe
             target_carbs_per_hour_g=target_carbs,
             is_consolidation=is_consolidation,
             long_sessions=profile.long_sessions,
+            available_gels=available_gels,
         )
         weeks.append(week)
 

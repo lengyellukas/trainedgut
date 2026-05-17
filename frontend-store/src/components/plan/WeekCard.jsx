@@ -81,7 +81,8 @@ export default function WeekCard({ week, extraSessions = [], onExtrasChanged }) 
                 <tr>
                   <th>Time</th>
                   <th>Gels</th>
-                  <th>Carbs</th>
+                  <th>Target</th>
+                  <th>Actual</th>
                 </tr>
               </thead>
               <tbody>
@@ -89,15 +90,22 @@ export default function WeekCard({ week, extraSessions = [], onExtrasChanged }) 
                   <tr key={w.window_number}>
                     <td>T+{w.time_from_start_minutes} min</td>
                     <td>
-                      {w.n_large_gels > 0 && (
-                        <span className="gel-pill">{w.n_large_gels}× large (40g)</span>
-                      )}
-                      {w.n_small_gels > 0 && (
-                        <span className="gel-pill">{w.n_small_gels}× small (25g)</span>
-                      )}
-                      {w.gel_count === 0 && <span style={{ opacity: 0.3 }}>—</span>}
+                      {(w.gels || []).map((g, i) => (
+                        <span key={i} className="gel-pill">
+                          {g.quantity}× {g.size_label} ({g.carbs_g}g)
+                        </span>
+                      ))}
+                      {(!w.gels || w.gels.length === 0) && <span style={{ opacity: 0.3 }}>—</span>}
                     </td>
-                    <td>{w.actual_carbs_g}g</td>
+                    <td>{w.target_carbs_g}g</td>
+                    <td>
+                      {w.actual_carbs_g}g
+                      {w.overshoot_g > 0 && (
+                        <span className="overshoot-pill" title={`${w.overshoot_g}g over target due to whole-gel sizing`}>
+                          +{w.overshoot_g}
+                        </span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

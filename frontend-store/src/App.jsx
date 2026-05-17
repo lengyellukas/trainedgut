@@ -4,6 +4,7 @@ import AboutYou from './components/steps/AboutYou'
 import YourRace from './components/steps/YourRace'
 import YourTraining from './components/steps/YourTraining'
 import YourFueling from './components/steps/YourFueling'
+import YourGels from './components/steps/YourGels'
 import Review from './components/steps/Review'
 import PlanResult from './components/plan/PlanResult'
 import AuthScreen from './components/AuthScreen'
@@ -20,6 +21,7 @@ const STEPS = [
   { id: 'race',     label: 'Your Race' },
   { id: 'training', label: 'Training' },
   { id: 'fueling',  label: 'Fueling' },
+  { id: 'gels',     label: 'Gels' },
   { id: 'review',   label: 'Review' },
 ]
 
@@ -41,6 +43,8 @@ const INITIAL_DATA = {
   // Your Fueling
   carb_tolerance_option: '',
   gi_history: '',
+  market: '',
+  gel_brand: 'trainedgut',
 }
 
 function isStepValid(step, data) {
@@ -61,6 +65,8 @@ function isStepValid(step, data) {
     case 3:
       return !!data.carb_tolerance_option && !!data.gi_history
     case 4:
+      return !!data.market && !!data.gel_brand
+    case 5:
       return true
     default:
       return true
@@ -174,6 +180,11 @@ export default function App() {
     setError(null)
     try {
       const result = await generatePlan(data)
+      if (result.status === 'too_short' || !result.plan) {
+        // Backend refused to build a plan — keep the user on Review with a clear message
+        setError(result.status_message || 'Plan could not be generated.')
+        return
+      }
       setPlan(result)
       setView('plan')
       refreshExtraSessions()
@@ -237,12 +248,15 @@ export default function App() {
   }
 
   // view === 'form'
+  const totalSteps = STEPS.length
+  const stepProps = { data, update, stepNumber: step + 1, totalSteps }
   const stepComponents = [
-    <AboutYou data={data} update={update} />,
-    <YourRace data={data} update={update} />,
-    <YourTraining data={data} update={update} />,
-    <YourFueling data={data} update={update} />,
-    <Review data={data} onGenerate={handleGenerate} loading={loading} error={error} />,
+    <AboutYou {...stepProps} />,
+    <YourRace {...stepProps} />,
+    <YourTraining {...stepProps} />,
+    <YourFueling {...stepProps} />,
+    <YourGels {...stepProps} />,
+    <Review {...stepProps} onGenerate={handleGenerate} loading={loading} error={error} />,
   ]
 
   const isLast = step === STEPS.length - 1

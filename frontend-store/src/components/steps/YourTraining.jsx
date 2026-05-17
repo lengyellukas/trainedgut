@@ -8,7 +8,7 @@ const DURATIONS = [
   { value: 'over_6h',    label: '6 h +'          },
 ]
 
-export default function YourTraining({ data, update }) {
+export default function YourTraining({ data, update, stepNumber, totalSteps }) {
   const [touched, setTouched] = useState(false)
   const sessions = data.long_sessions
 
@@ -29,7 +29,7 @@ export default function YourTraining({ data, update }) {
 
   return (
     <div className="step-content">
-      <p className="step-eyebrow">Step 3 of 5</p>
+      <p className="step-eyebrow">Step {stepNumber} of {totalSteps}</p>
       <h1 className="step-title">Your Training</h1>
       <p className="step-subtitle">
         Which primary long sessions do you do in a typical training week? These are the sessions where gut training matters -

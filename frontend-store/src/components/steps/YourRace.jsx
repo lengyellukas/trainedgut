@@ -68,7 +68,7 @@ function weeksWarning(data) {
   return null
 }
 
-export default function YourRace({ data, update }) {
+export default function YourRace({ data, update, stepNumber, totalSteps }) {
   const [touched, setTouched] = useState({})
   const touch = field => setTouched(t => ({ ...t, [field]: true }))
 
@@ -77,7 +77,7 @@ export default function YourRace({ data, update }) {
 
   return (
     <div className="step-content">
-      <p className="step-eyebrow">Step 2 of 5</p>
+      <p className="step-eyebrow">Step {stepNumber} of {totalSteps}</p>
       <h1 className="step-title">Your Race</h1>
       <p className="step-subtitle">
         Tell us about your target event so we can align the protocol with your race day.

@@ -5,10 +5,10 @@ from protocol.models import (
     Plan, GelRatio, GeneratePlanResponse, PlanStatus,
     Plan as PlanResponse, Week as WeekResponse,
     Session as SessionResponse, FuelingWindow as FuelingWindowResponse,
-    GelPackageSummary,
+    GelOption, GelEntry, GelPackageItem, GelPackageSummary,
 )
 from protocol.inputs import AthleteProfile
-from models_db import Athlete, Plan as PlanDB, Week, Session as SessionDB, FuelingWindow, Gel, Feedback, ExtraSession
+from models_db import Athlete, Plan as PlanDB, Week, Session as SessionDB, FuelingWindow, FuelingWindowGel, Gel, Feedback, ExtraSession
 
 GEL_RATIO_TO_PHASE = {
     GelRatio.GLUCOSE_100: 1,
@@ -50,19 +50,34 @@ def _get_or_create_athlete(db: Session, email: str, supabase_user_id: str | None
     return athlete
 
 
-def _get_gel(db: Session, size: str, ratio_phase: int) -> Gel:
-    return db.query(Gel).filter(Gel.size == size, Gel.ratio_phase == ratio_phase).one()
+def load_gel_options(db: Session, brand: str, market: str | None = None) -> list[GelOption]:
+    """Return gel options for the chosen source.
+
+    brand='trainedgut'  → only TrainedGut catalogue
+    brand='third_party' → all brands except TrainedGut (mix and match)
+    """
+    q = db.query(Gel)
+    if brand == "trainedgut":
+        q = q.filter(Gel.brand == "trainedgut")
+    elif brand == "third_party":
+        q = q.filter(Gel.brand != "trainedgut")
+    rows = q.all()
+    if market:
+        rows = [r for r in rows if market in (r.markets or [])]
+    return [
+        GelOption(
+            id=g.id,
+            brand=g.brand,
+            carbs_g=g.carbs_g,
+            size_label=g.size,
+            ratio_phase=g.ratio_phase,
+        )
+        for g in rows
+    ]
 
 
 def save_plan(db: Session, email: str, supabase_user_id: str | None, profile: AthleteProfile, plan: Plan) -> PlanDB:
     athlete = _get_or_create_athlete(db, email, supabase_user_id, profile)
-
-    gel_cache: dict[tuple, Gel] = {}
-    def get_gel(size: str, phase: int) -> Gel:
-        key = (size, phase)
-        if key not in gel_cache:
-            gel_cache[key] = _get_gel(db, size, phase)
-        return gel_cache[key]
 
     weeks = plan.weeks
     db_plan = PlanDB(
@@ -107,20 +122,21 @@ def save_plan(db: Session, email: str, supabase_user_id: str | None, profile: At
             db.flush()
 
             for window in session.fueling_windows:
-                small_gel = get_gel("small", phase) if window.n_small_gels > 0 else None
-                large_gel = get_gel("large", phase) if window.n_large_gels > 0 else None
                 db_window = FuelingWindow(
                     session_id=db_session.id,
-                    small_gel_id=small_gel.id if small_gel else None,
-                    large_gel_id=large_gel.id if large_gel else None,
                     window_number=window.window_number,
                     time_minutes=window.time_from_start_minutes,
                     carbs_target_g=window.target_carbs_g,
                     carbs_actual_g=window.actual_carbs_g,
-                    n_small_gels=window.n_small_gels,
-                    n_large_gels=window.n_large_gels,
                 )
                 db.add(db_window)
+                db.flush()
+                for entry in window.gels:
+                    db.add(FuelingWindowGel(
+                        window_id=db_window.id,
+                        gel_id=entry.gel_id,
+                        quantity=entry.quantity,
+                    ))
 
     db.commit()
     return db_plan
@@ -273,11 +289,16 @@ def load_active_plan_response(db: Session, supabase_user_id: str) -> GeneratePla
     if not plan_db:
         return None
 
-    # Eager-load weeks → sessions → fueling_windows in one query tree
+    # Eager-load weeks → sessions → fueling_windows → gel_entries → gel in one tree
     weeks_db = (
         db.query(Week)
         .filter(Week.plan_id == plan_db.id)
-        .options(joinedload(Week.sessions).joinedload(SessionDB.fueling_windows))
+        .options(
+            joinedload(Week.sessions)
+            .joinedload(SessionDB.fueling_windows)
+            .joinedload(FuelingWindow.gel_entries)
+            .joinedload(FuelingWindowGel.gel)
+        )
         .order_by(Week.week_number)
         .all()
     )
@@ -285,8 +306,7 @@ def load_active_plan_response(db: Session, supabase_user_id: str) -> GeneratePla
         return None
 
     weeks_response: list[WeekResponse] = []
-    pkg_counts = {f"small_phase{i}_count": 0 for i in (1, 2, 3)}
-    pkg_counts.update({f"large_phase{i}_count": 0 for i in (1, 2, 3)})
+    package_items: dict[str, GelPackageItem] = {}   # keyed by gel_id
 
     for week_db in weeks_db:
         gel_ratio = PHASE_TO_GEL_RATIO[week_db.ratio_phase]
@@ -295,22 +315,44 @@ def load_active_plan_response(db: Session, supabase_user_id: str) -> GeneratePla
         sessions_response: list[SessionResponse] = []
         for s_db in sessions_sorted:
             windows_sorted = sorted(s_db.fueling_windows, key=lambda w: w.window_number)
-            windows_response = [
-                FuelingWindowResponse(
+
+            windows_response: list[FuelingWindowResponse] = []
+            for w in windows_sorted:
+                gel_entries_response: list[GelEntry] = []
+                for je in w.gel_entries:
+                    gel_entries_response.append(GelEntry(
+                        gel_id=je.gel_id,
+                        brand=je.gel.brand,
+                        carbs_g=je.gel.carbs_g,
+                        size_label=je.gel.size,
+                        quantity=je.quantity,
+                    ))
+                    # accumulate package summary
+                    key = je.gel_id
+                    if key in package_items:
+                        package_items[key].quantity += je.quantity
+                    else:
+                        package_items[key] = GelPackageItem(
+                            gel_id=je.gel_id,
+                            brand=je.gel.brand,
+                            size_label=je.gel.size,
+                            carbs_g=je.gel.carbs_g,
+                            ratio_phase=je.gel.ratio_phase,
+                            quantity=je.quantity,
+                        )
+                gel_count = sum(e.quantity for e in gel_entries_response)
+                actual = int(w.carbs_actual_g)
+                target = int(w.carbs_target_g)
+                windows_response.append(FuelingWindowResponse(
                     window_number=w.window_number,
                     time_from_start_minutes=w.time_minutes,
-                    target_carbs_g=int(w.carbs_target_g),
-                    actual_carbs_g=int(w.carbs_actual_g),
-                    gel_count=w.n_small_gels + w.n_large_gels,
-                    n_large_gels=w.n_large_gels,
-                    n_small_gels=w.n_small_gels,
+                    target_carbs_g=target,
+                    actual_carbs_g=actual,
+                    overshoot_g=actual - target,
+                    gel_count=gel_count,
+                    gels=gel_entries_response,
                     gel_ratio=gel_ratio,
-                )
-                for w in windows_sorted
-            ]
-            for w in windows_sorted:
-                pkg_counts[f"small_phase{week_db.ratio_phase}_count"] += w.n_small_gels
-                pkg_counts[f"large_phase{week_db.ratio_phase}_count"] += w.n_large_gels
+                ))
 
             sessions_response.append(SessionResponse(
                 session_number=s_db.session_number,
@@ -332,8 +374,8 @@ def load_active_plan_response(db: Session, supabase_user_id: str) -> GeneratePla
             sessions=sessions_response,
         ))
 
-    pkg_counts["total_gels"] = sum(pkg_counts.values())
-    gel_package = GelPackageSummary(**pkg_counts)
+    items_sorted = sorted(package_items.values(), key=lambda i: (i.ratio_phase, i.carbs_g, i.brand))
+    gel_package = GelPackageSummary(items=items_sorted, total_gels=sum(i.quantity for i in items_sorted))
 
     plan_response = PlanResponse(
         athlete_body_weight_kg=athlete.weight_kg or 0.0,

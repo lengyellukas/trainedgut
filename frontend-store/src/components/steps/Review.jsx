@@ -1,3 +1,5 @@
+import { GEL_SOURCES, MARKETS } from '../../constants'
+
 const SPORT_LABELS = {
   triathlon: 'Triathlon',
   running: 'Running',
@@ -24,14 +26,14 @@ function Row({ label, value }) {
   )
 }
 
-export default function Review({ data, onGenerate, loading, error }) {
+export default function Review({ data, onGenerate, loading, error, stepNumber, totalSteps }) {
   const sessions = data.long_sessions.map((s, i) =>
     `Session ${i + 1}: ${DURATION_LABELS[s.duration_option] || '-'}`
   ).join(' · ')
 
   return (
     <div className="step-content">
-      <p className="step-eyebrow">Step 5 of 5</p>
+      <p className="step-eyebrow">Step {stepNumber} of {totalSteps}</p>
       <h1 className="step-title">Review</h1>
       <p className="step-subtitle">
         Everything looks right? Generate your personalised protocol below.
@@ -69,6 +71,8 @@ export default function Review({ data, onGenerate, loading, error }) {
           <p className="review-section-label">Your Fueling</p>
           <Row label="Current intake" value={CARB_LABELS[data.carb_tolerance_option]} />
           <Row label="GI history"     value={GI_LABELS[data.gi_history]} />
+          <Row label="Ship to"        value={MARKETS.find(m => m.value === data.market)?.label} />
+          <Row label="Gels"           value={GEL_SOURCES.find(s => s.value === data.gel_brand)?.label} />
         </div>
       </div>
 

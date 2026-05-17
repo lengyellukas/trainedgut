@@ -54,6 +54,8 @@ export async function generatePlan(formData) {
     carb_tolerance_option: formData.carb_tolerance_option,
     gi_history: formData.gi_history,
     long_sessions: formData.long_sessions.map(s => ({ duration_option: s.duration_option })),
+    gel_brand: formData.gel_brand || 'trainedgut',
+    market: formData.market || null,
   })
 }
 

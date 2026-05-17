@@ -6,28 +6,37 @@ function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+const PHASE_LABEL = {
+  1: 'Phase 1 - 100% glucose',
+  2: 'Phase 2 - 2:1 ratio',
+  3: 'Phase 3 - 1:0.8 ratio',
+}
+
 function GelPackage({ pkg }) {
+  // Group by phase for display
+  const byPhase = { 1: [], 2: [], 3: [] }
+  for (const item of pkg.items || []) {
+    if (byPhase[item.ratio_phase]) byPhase[item.ratio_phase].push(item)
+  }
+
   return (
     <div className="gel-package">
       <div className="gel-package-title">Full Gel Package</div>
-      <div className="gel-phase-row">
-        <span className="gel-phase-name">Phase 1 — 100% glucose</span>
-        <span className="gel-phase-count">
-          {pkg.small_phase1_count}× small · {pkg.large_phase1_count}× large
-        </span>
-      </div>
-      <div className="gel-phase-row">
-        <span className="gel-phase-name">Phase 2 — 2:1 ratio</span>
-        <span className="gel-phase-count">
-          {pkg.small_phase2_count}× small · {pkg.large_phase2_count}× large
-        </span>
-      </div>
-      <div className="gel-phase-row">
-        <span className="gel-phase-name">Phase 3 — 1:0.8 ratio</span>
-        <span className="gel-phase-count">
-          {pkg.small_phase3_count}× small · {pkg.large_phase3_count}× large
-        </span>
-      </div>
+      {[1, 2, 3].map(phase => (
+        byPhase[phase].length > 0 && (
+          <div key={phase} className="gel-phase-block">
+            <div className="gel-phase-name">{PHASE_LABEL[phase]}</div>
+            {byPhase[phase].map(item => (
+              <div key={item.gel_id} className="gel-phase-row">
+                <span className="gel-phase-product">
+                  {item.brand} {item.size_label} ({item.carbs_g}g)
+                </span>
+                <span className="gel-phase-count">{item.quantity}×</span>
+              </div>
+            ))}
+          </div>
+        )
+      ))}
       <div className="gel-total-row">
         <span className="gel-total-label">Total gels</span>
         <span className="gel-total-count">{pkg.total_gels}</span>

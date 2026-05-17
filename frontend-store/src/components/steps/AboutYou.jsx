@@ -18,7 +18,7 @@ function rangeError(field, value) {
   return null
 }
 
-export default function AboutYou({ data, update }) {
+export default function AboutYou({ data, update, stepNumber, totalSteps }) {
   const [touched, setTouched] = useState({})
 
   const handleChange = (field, value) => {
@@ -28,7 +28,7 @@ export default function AboutYou({ data, update }) {
 
   return (
     <div className="step-content">
-      <p className="step-eyebrow">Step 1 of 5</p>
+      <p className="step-eyebrow">Step {stepNumber} of {totalSteps}</p>
       <h1 className="step-title">About You</h1>
       <p className="step-subtitle">
         Your physical profile helps us calibrate the starting point and pacing of your gut training.

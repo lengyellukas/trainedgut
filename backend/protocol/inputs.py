@@ -42,6 +42,25 @@ class StartPreference(str, Enum):
     OPTIMAL = "optimal"                # Work back from race_date
 
 
+class GelBrand(str, Enum):
+    """Where the gels for this plan come from.
+
+    TRAINEDGUT  : use TrainedGut's own catalogue exclusively.
+    THIRD_PARTY : mix any non-TrainedGut brand sold in the athlete's market.
+                  The selection algorithm picks per phase from whatever fits.
+    """
+    TRAINEDGUT = "trainedgut"
+    THIRD_PARTY = "third_party"
+
+
+class Market(str, Enum):
+    """Country where the athlete will train + buy gels.
+    Used to filter the gels catalogue to products actually available there."""
+    SWITZERLAND = "CH"
+    CZECH_REPUBLIC = "CZ"
+    SLOVAKIA = "SK"
+
+
 class LongSession(BaseModel):
     duration_option: SessionDurationOption
 
@@ -56,3 +75,5 @@ class AthleteProfile(BaseModel):
     carb_tolerance_option: CarbToleranceOption
     gi_history: GIHistory
     long_sessions: List[LongSession]
+    gel_brand: GelBrand = GelBrand.TRAINEDGUT          # which brand's gels to use
+    market: Optional[Market] = None                    # country filter; required once third-party brands exist
