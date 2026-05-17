@@ -57,21 +57,18 @@ export default function AboutYou({ data, update, stepNumber, totalSteps }) {
       {/* Age + Height + Weight */}
       <div className="input-row-3" style={{ marginBottom: 8 }}>
         <div className="field-group">
-          <label className="field-label">Age</label>
-          <div className="input-suffix-wrap">
-            <input
-              className={`field-input${touched.age && rangeError('age', data.age) ? ' field-input--error' : ''}`}
-              type="number"
-              min={FIELD_LIMITS.age.min} max={FIELD_LIMITS.age.max}
-              placeholder="32"
-              value={data.age}
-              onKeyDown={blockNonInteger}
-              onChange={e => handleChange('age', e.target.value)}
-            />
-            <span className="input-suffix">years</span>
-          </div>
-          {touched.age && rangeError('age', data.age) && (
-            <span className="field-error">{rangeError('age', data.age)}</span>
+          <label className="field-label">Birth year</label>
+          <input
+            className={`field-input${touched.birth_year && rangeError('birth_year', data.birth_year) ? ' field-input--error' : ''}`}
+            type="number"
+            min={FIELD_LIMITS.birth_year.min} max={FIELD_LIMITS.birth_year.max}
+            placeholder={`${FIELD_LIMITS.birth_year.max - 30}`}
+            value={data.birth_year}
+            onKeyDown={blockNonInteger}
+            onChange={e => handleChange('birth_year', e.target.value)}
+          />
+          {touched.birth_year && rangeError('birth_year', data.birth_year) && (
+            <span className="field-error">{rangeError('birth_year', data.birth_year)}</span>
           )}
         </div>
 

@@ -43,6 +43,10 @@ export async function deleteActivePlan() {
   return request('DELETE', '/plan')
 }
 
+export async function emailActivePlan() {
+  return request('POST', '/plan/email')
+}
+
 export async function generatePlan(formData) {
   return request('POST', '/generate-plan', {
     body_weight_kg: parseFloat(formData.body_weight_kg),
@@ -56,6 +60,7 @@ export async function generatePlan(formData) {
     long_sessions: formData.long_sessions.map(s => ({ duration_option: s.duration_option })),
     gel_brand: formData.gel_brand || 'trainedgut',
     market: formData.market || null,
+    birth_year: formData.birth_year ? parseInt(formData.birth_year, 10) : null,
   })
 }
 

@@ -11,6 +11,8 @@ from protocol.generator import generate_plan
 from database import get_db
 from persistence import save_plan, save_feedback, save_extra_session, find_or_create_athlete, list_extra_sessions, load_active_plan_response, delete_active_plan, load_gel_options
 from auth import get_current_user
+from pdf_generator import generate_plan_pdf
+from email_service import send_plan_email
 
 app = FastAPI(title="TrainedGut API", version="0.1.0")
 
@@ -51,11 +53,13 @@ def health():
 def get_me(user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     """Lazy-create the athlete row on first authenticated request."""
     athlete = find_or_create_athlete(db, email=user["email"], supabase_user_id=user["sub"])
+    age = (date.today().year - athlete.birth_year) if athlete.birth_year else None
     return {
         "email": athlete.email,
         "supabase_user_id": athlete.supabase_user_id,
         "athlete_id": athlete.id,
-        "age": athlete.age,
+        "birth_year": athlete.birth_year,
+        "age": age,                       # derived from birth_year for display convenience
         "weight_kg": athlete.weight_kg,
         "height_cm": athlete.height_cm,
     }
@@ -72,6 +76,12 @@ def generate_plan_endpoint(
 
     if response.status != PlanStatus.TOO_SHORT:
         save_plan(db, email=user["email"], supabase_user_id=user["sub"], profile=request, plan=response.plan)
+        # Email the plan with PDF attached. Failures here must not break plan generation.
+        try:
+            pdf_bytes = generate_plan_pdf(response)
+            send_plan_email(user["email"], response, pdf_bytes)
+        except Exception as exc:
+            print(f"[generate-plan] Plan email pipeline failed: {exc}")
 
     return response
 
@@ -94,6 +104,23 @@ def delete_active_plan_endpoint(
     if not delete_active_plan(db, supabase_user_id=user["sub"]):
         raise HTTPException(status_code=404, detail="No active plan to delete")
     return
+
+
+@app.post("/plan/email", status_code=200)
+def resend_plan_email_endpoint(
+    user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Re-send the user's active plan to their email (HTML body + PDF attachment)."""
+    response = load_active_plan_response(db, supabase_user_id=user["sub"])
+    if not response or not response.plan:
+        raise HTTPException(status_code=404, detail="No active plan to email")
+    try:
+        pdf_bytes = generate_plan_pdf(response)
+        send_plan_email(user["email"], response, pdf_bytes, subject="Your TrainedGut plan (resend)")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Could not send email: {exc}")
+    return {"status": "sent", "email": user["email"]}
 
 
 @app.post("/feedback", status_code=201)

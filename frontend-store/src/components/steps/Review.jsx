@@ -43,7 +43,7 @@ export default function Review({ data, onGenerate, loading, error, stepNumber, t
         <div className="review-block">
           <p className="review-section-label">About You</p>
           <Row label="Biological sex" value={GENDER_LABELS[data.gender]} />
-          <Row label="Age"     value={data.age ? `${data.age} yrs` : null} />
+          <Row label="Birth year" value={data.birth_year || null} />
           <Row label="Weight"  value={data.body_weight_kg ? `${data.body_weight_kg} kg` : null} />
           <Row label="Height"  value={data.height_cm ? `${data.height_cm} cm` : null} />
         </div>

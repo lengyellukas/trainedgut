@@ -11,7 +11,7 @@ export default function ProfileView({ email, profile, onBack, onLogout }) {
   // Athlete row exists from /me lazy-create, but biometric fields are only
   // populated after a plan is generated. Treat all-null as "empty".
   const hasAnyAthleteData =
-    profile && (profile.age != null || profile.weight_kg != null || profile.height_cm != null)
+    profile && (profile.birth_year != null || profile.weight_kg != null || profile.height_cm != null)
 
   return (
     <div className="menu-shell">
@@ -30,7 +30,12 @@ export default function ProfileView({ email, profile, onBack, onLogout }) {
         {hasAnyAthleteData ? (
           <div className="profile-card">
             <Row label="Email" value={email} />
-            <Row label="Age" value={profile.age != null ? `${profile.age} years` : null} />
+            <Row
+              label="Birth year"
+              value={profile.birth_year != null
+                ? `${profile.birth_year}${profile.age != null ? ` (age ${profile.age})` : ''}`
+                : null}
+            />
             <Row label="Weight" value={profile.weight_kg != null ? `${profile.weight_kg} kg` : null} />
             <Row label="Height" value={profile.height_cm != null ? `${profile.height_cm} cm` : null} />
             <p className="profile-note">

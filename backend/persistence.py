@@ -43,9 +43,9 @@ def find_or_create_athlete(db: Session, email: str, supabase_user_id: str | None
 def _get_or_create_athlete(db: Session, email: str, supabase_user_id: str | None, profile: AthleteProfile) -> Athlete:
     athlete = find_or_create_athlete(db, email, supabase_user_id)
     # Update biometric fields from the latest plan submission
-    athlete.age = getattr(profile, "age", None)
+    athlete.birth_year = getattr(profile, "birth_year", None) or athlete.birth_year
     athlete.weight_kg = profile.body_weight_kg
-    athlete.height_cm = getattr(profile, "height_cm", None)
+    athlete.height_cm = getattr(profile, "height_cm", None) or athlete.height_cm
     db.flush()
     return athlete
 

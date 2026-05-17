@@ -1,7 +1,10 @@
+// Birth-year range slides with the current year so age bounds stay 15-95.
+const _CURRENT_YEAR = new Date().getFullYear()
+
 export const FIELD_LIMITS = {
-  age:            { min: 15,  max: 95,  label: 'Age',         unit: 'years' },
-  body_weight_kg: { min: 30,  max: 250, label: 'Body weight',  unit: 'kg'    },
-  height_cm:      { min: 100, max: 245, label: 'Height',       unit: 'cm'    },
+  birth_year:     { min: _CURRENT_YEAR - 95, max: _CURRENT_YEAR - 15, label: 'Birth year',  unit: ''   },
+  body_weight_kg: { min: 30,                 max: 250,                label: 'Body weight', unit: 'kg' },
+  height_cm:      { min: 100,                max: 245,                label: 'Height',      unit: 'cm' },
 }
 
 // Countries where TrainedGut + partner gels are sold and shipped.

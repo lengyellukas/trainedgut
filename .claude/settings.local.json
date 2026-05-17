@@ -18,7 +18,9 @@
       "Bash(venv/bin/python *)",
       "Bash(./venv/bin/alembic upgrade *)",
       "Bash(./venv/bin/pytest tests/ -v)",
-      "Bash(./venv/bin/pytest tests/)"
+      "Bash(./venv/bin/pytest tests/)",
+      "Bash(./venv/bin/pip install *)",
+      "Bash(./venv/bin/python -c ' *)"
     ]
   }
 }

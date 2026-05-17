@@ -10,7 +10,7 @@ import PlanResult from './components/plan/PlanResult'
 import AuthScreen from './components/AuthScreen'
 import MainMenu from './components/MainMenu'
 import ProfileView from './components/ProfileView'
-import { generatePlan, getMe, getExtraSessions, getActivePlan, deleteActivePlan } from './api/client'
+import { generatePlan, getMe, getExtraSessions, getActivePlan, deleteActivePlan, emailActivePlan } from './api/client'
 import { FIELD_LIMITS } from './constants'
 import { supabase } from './supabase'
 import './styles/form.css'
@@ -26,10 +26,10 @@ const STEPS = [
 ]
 
 const INITIAL_DATA = {
-  // About You (height/gender are frontend-only - 3 not sent to backend)
+  // About You (height/gender are frontend-only - not sent to backend)
   //TODO: send them to backend so they might be eventually used based on czech nutrionist
   gender: '',
-  age: '',
+  birth_year: '',
   height_cm: '',
   body_weight_kg: '',
   // Your Race
@@ -52,7 +52,7 @@ function isStepValid(step, data) {
     case 0:
       return (
         !!data.gender &&
-        Number(data.age) >= FIELD_LIMITS.age.min && Number(data.age) <= FIELD_LIMITS.age.max &&
+        Number(data.birth_year) >= FIELD_LIMITS.birth_year.min && Number(data.birth_year) <= FIELD_LIMITS.birth_year.max &&
         Number(data.body_weight_kg) >= FIELD_LIMITS.body_weight_kg.min && Number(data.body_weight_kg) <= FIELD_LIMITS.body_weight_kg.max &&
         Number(data.height_cm) >= FIELD_LIMITS.height_cm.min && Number(data.height_cm) <= FIELD_LIMITS.height_cm.max
       )
@@ -140,6 +140,15 @@ export default function App() {
 
   function goToMenu() {
     setView('menu')
+  }
+
+  async function handleEmailPlan() {
+    try {
+      const result = await emailActivePlan()
+      alert(`Plan emailed to ${result.email}. Check your inbox (and spam folder).`)
+    } catch (err) {
+      alert(`Could not send the email. ${err.message || ''}`)
+    }
   }
 
   async function handleCancelPlan() {
@@ -243,6 +252,7 @@ export default function App() {
         onReset={goToMenu}
         onLogout={handleLogout}
         onCancel={handleCancelPlan}
+        onEmail={handleEmailPlan}
       />
     )
   }

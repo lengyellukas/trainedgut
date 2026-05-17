@@ -77,3 +77,4 @@ class AthleteProfile(BaseModel):
     long_sessions: List[LongSession]
     gel_brand: GelBrand = GelBrand.TRAINEDGUT          # which brand's gels to use
     market: Optional[Market] = None                    # country filter; required once third-party brands exist
+    birth_year: Optional[int] = None                   # used to derive age at any future date
