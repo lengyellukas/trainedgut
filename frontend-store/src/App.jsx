@@ -84,6 +84,12 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(true)
   const [extraSessions, setExtraSessions] = useState([])
   const [profile, setProfile] = useState(null)
+  const [toast, setToast] = useState(null)   // { message, kind: 'success'|'error' } | null
+
+  function showToast(message, kind = 'success') {
+    setToast({ message, kind })
+    window.setTimeout(() => setToast(null), 4000)
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -146,9 +152,9 @@ export default function App() {
     try {
       const result = await emailActivePlan({ weekNumber })
       const what = weekNumber != null ? `Week ${weekNumber}` : 'Full plan'
-      alert(`${what} emailed to ${result.email}. Check your inbox (and spam folder).`)
+      showToast(`${what} emailed to ${result.email}. Check your inbox.`, 'success')
     } catch (err) {
-      alert(`Could not send the email. ${err.message || ''}`)
+      showToast(`Could not send the email. ${err.message || ''}`, 'error')
     }
   }
 
@@ -160,7 +166,7 @@ export default function App() {
       setExtraSessions([])
       setView('menu')
     } catch (err) {
-      alert(`Could not cancel the plan. ${err.message || ''}`)
+      showToast(`Could not cancel the plan. ${err.message || ''}`, 'error')
     }
   }
 
@@ -207,54 +213,76 @@ export default function App() {
   }
 
 
+  const toastEl = toast && (
+    <div className={`toast toast--${toast.kind}`} role="status" aria-live="polite">
+      <span className="toast-msg">{toast.message}</span>
+      <button className="toast-close" onClick={() => setToast(null)} aria-label="Dismiss">×</button>
+    </div>
+  )
+
   if (authLoading) {
     return (
-      <div className="loading-screen">
-        <div className="spinner" />
-      </div>
+      <>
+        <div className="loading-screen"><div className="spinner" /></div>
+        {toastEl}
+      </>
     )
   }
 
   if (!session) {
-    return <AuthScreen />
+    return <>{<AuthScreen />}{toastEl}</>
   }
 
   if (loading) {
     return (
-      <div className="loading-screen">
-        <div className="spinner" />
-        <div className="loading-title">Building your plan…</div>
-        <div className="loading-sub">Calculating your week-by-week protocol</div>
-      </div>
+      <>
+        <div className="loading-screen">
+          <div className="spinner" />
+          <div className="loading-title">Building your plan…</div>
+          <div className="loading-sub">Calculating your week-by-week protocol</div>
+        </div>
+        {toastEl}
+      </>
     )
   }
 
   if (view === 'menu') {
     return (
-      <MainMenu
-        email={session.user.email}
-        hasPlan={!!plan}
-        onSelect={handleMenuSelect}
-        onLogout={handleLogout}
-      />
+      <>
+        <MainMenu
+          email={session.user.email}
+          hasPlan={!!plan}
+          onSelect={handleMenuSelect}
+          onLogout={handleLogout}
+        />
+        {toastEl}
+      </>
     )
   }
 
   if (view === 'profile') {
-    return <ProfileView email={session.user.email} profile={profile} onBack={goToMenu} onLogout={handleLogout} />
+    return (
+      <>
+        <ProfileView email={session.user.email} profile={profile} onBack={goToMenu} onLogout={handleLogout} />
+        {toastEl}
+      </>
+    )
   }
 
   if (view === 'plan') {
     return (
-      <PlanResult
-        plan={plan}
-        extraSessions={extraSessions}
-        onExtrasChanged={refreshExtraSessions}
-        onReset={goToMenu}
-        onLogout={handleLogout}
-        onCancel={handleCancelPlan}
-        onEmail={handleEmailPlan}
-      />
+      <>
+        <PlanResult
+          plan={plan}
+          extraSessions={extraSessions}
+          onExtrasChanged={refreshExtraSessions}
+          onReset={goToMenu}
+          onLogout={handleLogout}
+          onCancel={handleCancelPlan}
+          onEmail={handleEmailPlan}
+        />
+        {toastEl}
+      </>
     )
   }
 
@@ -274,30 +302,33 @@ export default function App() {
   const valid = isStepValid(step, data)
 
   return (
-    <div className="store-shell">
-      <header className="store-header">
-        <span className="store-logo">Trained<span>Gut</span></span>
-        <StepIndicator steps={STEPS} current={step} />
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn-logout" onClick={goToMenu}>← Menu</button>
-          <button className="btn-logout" onClick={handleLogout} title={session.user.email}>Log out</button>
-        </div>
-      </header>
+    <>
+      <div className="store-shell">
+        <header className="store-header">
+          <span className="store-logo">Trained<span>Gut</span></span>
+          <StepIndicator steps={STEPS} current={step} />
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn-logout" onClick={goToMenu}>← Menu</button>
+            <button className="btn-logout" onClick={handleLogout} title={session.user.email}>Log out</button>
+          </div>
+        </header>
 
-      <main className="store-main">
-        {stepComponents[step]}
-      </main>
+        <main className="store-main">
+          {stepComponents[step]}
+        </main>
 
-      {!isLast && (
-        <footer className="store-footer">
-          {step > 0 && (
-            <button className="btn-back" onClick={back}>← Back</button>
-          )}
-          <button className="btn-next" onClick={next} disabled={!valid}>
-            {step === STEPS.length - 2 ? 'Review →' : 'Next →'}
-          </button>
-        </footer>
-      )}
-    </div>
+        {!isLast && (
+          <footer className="store-footer">
+            {step > 0 && (
+              <button className="btn-back" onClick={back}>← Back</button>
+            )}
+            <button className="btn-next" onClick={next} disabled={!valid}>
+              {step === STEPS.length - 2 ? 'Review →' : 'Next →'}
+            </button>
+          </footer>
+        )}
+      </div>
+      {toastEl}
+    </>
   )
 }
