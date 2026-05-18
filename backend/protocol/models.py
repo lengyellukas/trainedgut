@@ -21,6 +21,7 @@ class GelOption(BaseModel):
     """A single available gel product (a row from the gels catalogue)."""
     id: str               # opaque identifier (Gel.id when sourced from DB)
     brand: str
+    product_name: str | None = None  # athlete-facing name, e.g. "Maurten Gel 100"
     carbs_g: int
     size_label: str       # 'small' / 'large' / etc — descriptive only
     ratio_phase: int      # 1, 2, or 3
@@ -30,6 +31,7 @@ class GelEntry(BaseModel):
     """One product + how many to consume in a window or across the plan."""
     gel_id: str
     brand: str
+    product_name: str | None = None
     carbs_g: int
     size_label: str
     quantity: int
@@ -70,6 +72,7 @@ class GelPackageItem(BaseModel):
     """One line in the package summary: how many of one specific product to order."""
     gel_id: str
     brand: str
+    product_name: str | None = None
     size_label: str
     carbs_g: int
     ratio_phase: int

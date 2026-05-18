@@ -73,6 +73,7 @@ def select_gels(target_carbs_g: int, options: List[GelOption]) -> List[GelEntry]
         GelEntry(
             gel_id=options_by_size[c].id,
             brand=options_by_size[c].brand,
+            product_name=options_by_size[c].product_name,
             carbs_g=c,
             size_label=options_by_size[c].size_label,
             quantity=q,
@@ -98,6 +99,7 @@ def summarise_package(weeks: List[Week]) -> GelPackageSummary:
                         by_id[key] = GelPackageItem(
                             gel_id=entry.gel_id,
                             brand=entry.brand,
+                            product_name=entry.product_name,
                             size_label=entry.size_label,
                             carbs_g=entry.carbs_g,
                             ratio_phase=phase,

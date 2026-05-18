@@ -93,6 +93,7 @@ class Gel(Base):
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=new_uuid)
     brand: Mapped[str] = mapped_column(String, nullable=False, default="trainedgut", index=True)
+    product_name: Mapped[str | None] = mapped_column(String, nullable=True)
     size: Mapped[str] = mapped_column(String, nullable=False)
     carbs_g: Mapped[int] = mapped_column(Integer, nullable=False)
     glucose_pct: Mapped[float] = mapped_column(Float, nullable=False)

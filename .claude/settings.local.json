@@ -20,7 +20,9 @@
       "Bash(./venv/bin/pytest tests/ -v)",
       "Bash(./venv/bin/pytest tests/)",
       "Bash(./venv/bin/pip install *)",
-      "Bash(./venv/bin/python -c ' *)"
+      "Bash(./venv/bin/python -c ' *)",
+      "Bash(./venv/bin/python seed.py)",
+      "Bash(./venv/bin/python seed_third_party.py)"
     ]
   }
 }

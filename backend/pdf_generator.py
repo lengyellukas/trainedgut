@@ -155,7 +155,7 @@ def _build_session_block(pdf: FPDF, session: Session) -> None:
     pdf.set_font("Helvetica", "", 9)
     for w in session.fueling_windows:
         gels_text = ", ".join(
-            f"{g.quantity}x {g.brand} {g.size_label} ({g.carbs_g}g)"
+            f"{g.quantity}x {g.product_name or (g.brand + ' ' + g.size_label)} ({g.carbs_g}g)"
             for g in (w.gels or [])
         ) or "-"
         actual = f"{w.actual_carbs_g}g"
@@ -205,7 +205,8 @@ def _build_package_page(pdf: FPDF, plan: Plan) -> None:
         pdf.set_text_color(*DARK)
         pdf.set_font("Helvetica", "", 10)
         for item in items:
-            pdf.cell(90, 6, f"{item.brand} {item.size_label}")
+            label = item.product_name or f"{item.brand} {item.size_label}"
+            pdf.cell(90, 6, label)
             pdf.cell(30, 6, f"{item.carbs_g}g per gel")
             pdf.cell(30, 6, f"{item.quantity} x", new_x="LMARGIN", new_y="NEXT")
         pdf.ln(4)

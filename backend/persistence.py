@@ -68,6 +68,7 @@ def load_gel_options(db: Session, brand: str, market: str | None = None) -> list
         GelOption(
             id=g.id,
             brand=g.brand,
+            product_name=g.product_name,
             carbs_g=g.carbs_g,
             size_label=g.size,
             ratio_phase=g.ratio_phase,
@@ -323,6 +324,7 @@ def load_active_plan_response(db: Session, supabase_user_id: str) -> GeneratePla
                     gel_entries_response.append(GelEntry(
                         gel_id=je.gel_id,
                         brand=je.gel.brand,
+                        product_name=je.gel.product_name,
                         carbs_g=je.gel.carbs_g,
                         size_label=je.gel.size,
                         quantity=je.quantity,
@@ -335,6 +337,7 @@ def load_active_plan_response(db: Session, supabase_user_id: str) -> GeneratePla
                         package_items[key] = GelPackageItem(
                             gel_id=je.gel_id,
                             brand=je.gel.brand,
+                            product_name=je.gel.product_name,
                             size_label=je.gel.size,
                             carbs_g=je.gel.carbs_g,
                             ratio_phase=je.gel.ratio_phase,
