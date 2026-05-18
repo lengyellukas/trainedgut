@@ -263,7 +263,14 @@ export default function App() {
   if (view === 'profile') {
     return (
       <>
-        <ProfileView email={session.user.email} profile={profile} onBack={goToMenu} onLogout={handleLogout} />
+        <ProfileView
+          email={session.user.email}
+          profile={profile}
+          onProfileChange={setProfile}
+          onShowToast={showToast}
+          onBack={goToMenu}
+          onLogout={handleLogout}
+        />
         {toastEl}
       </>
     )

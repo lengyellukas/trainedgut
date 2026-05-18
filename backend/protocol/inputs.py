@@ -78,3 +78,4 @@ class AthleteProfile(BaseModel):
     gel_brand: GelBrand = GelBrand.TRAINEDGUT          # which brand's gels to use
     market: Optional[Market] = None                    # country filter; required once third-party brands exist
     birth_year: Optional[int] = None                   # used to derive age at any future date
+    height_cm: Optional[int] = None                    # stored on the athlete profile for reference

@@ -24,7 +24,7 @@ app.add_middleware(
         "https://trainedgut.store",
         "http://localhost:5173",
     ],
-    allow_methods=["GET", "POST", "DELETE"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
     allow_headers=["*"],
 )
 
@@ -46,15 +46,16 @@ class ExtraSessionRequest(BaseModel):
     gi_scale: int
 
 
+class ProfileUpdateRequest(BaseModel):
+    weight_kg: float | None = None
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
 
-@app.get("/me")
-def get_me(user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
-    """Lazy-create the athlete row on first authenticated request."""
-    athlete = find_or_create_athlete(db, email=user["email"], supabase_user_id=user["sub"])
+def _athlete_to_me_dict(athlete) -> dict:
     age = (date.today().year - athlete.birth_year) if athlete.birth_year else None
     return {
         "email": athlete.email,
@@ -65,6 +66,30 @@ def get_me(user: dict = Depends(get_current_user), db: Session = Depends(get_db)
         "weight_kg": athlete.weight_kg,
         "height_cm": athlete.height_cm,
     }
+
+
+@app.get("/me")
+def get_me(user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Lazy-create the athlete row on first authenticated request."""
+    athlete = find_or_create_athlete(db, email=user["email"], supabase_user_id=user["sub"])
+    return _athlete_to_me_dict(athlete)
+
+
+@app.patch("/me")
+def patch_me(
+    request: ProfileUpdateRequest,
+    user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Update editable profile fields. Returns the same shape as GET /me."""
+    athlete = find_or_create_athlete(db, email=user["email"], supabase_user_id=user["sub"])
+    if request.weight_kg is not None:
+        if not (30 <= request.weight_kg <= 250):
+            raise HTTPException(status_code=400, detail="weight_kg must be between 30 and 250")
+        athlete.weight_kg = request.weight_kg
+    db.commit()
+    db.refresh(athlete)
+    return _athlete_to_me_dict(athlete)
 
 
 @app.post("/generate-plan", response_model=GeneratePlanResponse)

@@ -1,13 +1,89 @@
-function Row({ label, value }) {
+import { useState } from 'react'
+import { updateProfile } from '../api/client'
+
+function Row({ label, value, children }) {
   return (
     <div className="profile-row">
       <span className="profile-row-label">{label}</span>
-      <span className="profile-row-value">{value ?? '-'}</span>
+      {children ?? <span className="profile-row-value">{value ?? '-'}</span>}
     </div>
   )
 }
 
-export default function ProfileView({ email, profile, onBack, onLogout }) {
+function WeightRow({ profile, onProfileChange, onShowToast }) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  function start() {
+    setDraft(profile?.weight_kg != null ? String(profile.weight_kg) : '')
+    setEditing(true)
+  }
+
+  function cancel() {
+    setEditing(false)
+    setDraft('')
+  }
+
+  async function save() {
+    const value = parseFloat(draft)
+    if (Number.isNaN(value) || value < 30 || value > 250) {
+      onShowToast?.('Weight must be a number between 30 and 250 kg.', 'error')
+      return
+    }
+    setSaving(true)
+    try {
+      const updated = await updateProfile({ weight_kg: value })
+      onProfileChange?.(updated)
+      onShowToast?.(`Weight updated to ${value} kg.`, 'success')
+      setEditing(false)
+    } catch (err) {
+      onShowToast?.(`Could not update weight. ${err.message || ''}`, 'error')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (editing) {
+    return (
+      <div className="profile-row">
+        <span className="profile-row-label">Weight</span>
+        <span className="profile-edit-wrap">
+          <input
+            className="profile-edit-input"
+            type="number"
+            min="30"
+            max="250"
+            step="0.1"
+            value={draft}
+            onChange={e => setDraft(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') cancel() }}
+            autoFocus
+          />
+          <span className="profile-edit-unit">kg</span>
+          <button className="profile-edit-btn save" onClick={save} disabled={saving}>
+            {saving ? '…' : 'Save'}
+          </button>
+          <button className="profile-edit-btn cancel" onClick={cancel} disabled={saving}>
+            Cancel
+          </button>
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="profile-row">
+      <span className="profile-row-label">Weight</span>
+      <span className="profile-row-value">
+        {profile?.weight_kg != null ? `${profile.weight_kg} kg` : '-'}
+        <button className="profile-edit-pencil" onClick={start} title="Edit weight">✎</button>
+      </span>
+    </div>
+  )
+}
+
+export default function ProfileView({ email, profile, onProfileChange, onShowToast, onBack, onLogout }) {
   // Athlete row exists from /me lazy-create, but biometric fields are only
   // populated after a plan is generated. Treat all-null as "empty".
   const hasAnyAthleteData =
@@ -36,10 +112,11 @@ export default function ProfileView({ email, profile, onBack, onLogout }) {
                 ? `${profile.birth_year}${profile.age != null ? ` (age ${profile.age})` : ''}`
                 : null}
             />
-            <Row label="Weight" value={profile.weight_kg != null ? `${profile.weight_kg} kg` : null} />
+            <WeightRow profile={profile} onProfileChange={onProfileChange} onShowToast={onShowToast} />
             <Row label="Height" value={profile.height_cm != null ? `${profile.height_cm} cm` : null} />
             <p className="profile-note">
-              Captured from your most recent plan submission. Editable profile is coming in the next update.
+              Captured from your most recent plan submission. Only weight is editable - other fields
+              would require regenerating the plan.
             </p>
           </div>
         ) : (

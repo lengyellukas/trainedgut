@@ -35,6 +35,10 @@ export async function getMe() {
   return request('GET', '/me')
 }
 
+export async function updateProfile(updates) {
+  return request('PATCH', '/me', updates)
+}
+
 export async function getActivePlan() {
   return request('GET', '/plan')
 }
@@ -62,6 +66,7 @@ export async function generatePlan(formData) {
     gel_brand: formData.gel_brand || 'trainedgut',
     market: formData.market || null,
     birth_year: formData.birth_year ? parseInt(formData.birth_year, 10) : null,
+    height_cm: formData.height_cm ? parseInt(formData.height_cm, 10) : null,
   })
 }
 
