@@ -187,6 +187,59 @@
 }
 .week-stat-unit { font-size: 11px; color: rgba(255,255,255,0.35); }
 
+/* ── PER-WEEK GEL SUMMARY ────────────────────────────────────── */
+.week-gels {
+  padding: 16px 24px 18px;
+  background: var(--dark-3);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.week-gels-title {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.week-gels-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+.week-gels-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+}
+.week-gels-qty {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  color: var(--orange);
+}
+.week-gels-product {
+  color: var(--white);
+}
+.week-gels-carbs {
+  color: rgba(255,255,255,0.4);
+  font-size: 12px;
+}
+
+/* ── SHIPPING NOTE ───────────────────────────────────────────── */
+.plan-shipping-note {
+  margin-top: 32px;
+  padding: 14px 18px;
+  background: var(--dark-2);
+  border-left: 2px solid var(--gold);
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.5);
+  font-style: italic;
+}
+
 /* ── SESSIONS ────────────────────────────────────────────────── */
 .session-list { padding: 0 24px 20px; }
 

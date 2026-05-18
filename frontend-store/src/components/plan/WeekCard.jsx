@@ -30,9 +30,28 @@ function formatStartDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
 }
 
+function aggregateWeekGels(week) {
+  // Sum gel quantities across all sessions + fueling windows in this week,
+  // grouped by (brand, carbs_g, size_label). Returns a sorted array.
+  const byKey = new Map()
+  for (const session of week.sessions || []) {
+    for (const w of session.fueling_windows || []) {
+      for (const g of (w.gels || [])) {
+        const key = `${g.brand}|${g.carbs_g}|${g.size_label}`
+        const existing = byKey.get(key)
+        if (existing) existing.quantity += g.quantity
+        else byKey.set(key, { ...g })
+      }
+    }
+  }
+  return Array.from(byKey.values()).sort((a, b) => a.carbs_g - b.carbs_g)
+}
+
 export default function WeekCard({ week, extraSessions = [], onExtrasChanged }) {
   const isCurrent = isWeekCurrent(week)
   const isFuture = isWeekFuture(week)
+  const weekGels = aggregateWeekGels(week)
+  const weekTotal = weekGels.reduce((s, g) => s + g.quantity, 0)
 
   return (
     <div className="week-card">
@@ -68,6 +87,20 @@ export default function WeekCard({ week, extraSessions = [], onExtrasChanged }) 
           <div className="week-stat-value">{week.sessions.length}</div>
         </div>
       </div>
+
+      {weekGels.length > 0 && (
+        <div className="week-gels">
+          <p className="week-gels-title">Gels you'll need this week ({weekTotal})</p>
+          <ul className="week-gels-list">
+            {weekGels.map(g => (
+              <li key={`${g.brand}-${g.carbs_g}-${g.size_label}`}>
+                <span className="week-gels-qty">{g.quantity}×</span>
+                <span className="week-gels-product">{g.brand} {g.size_label} <span className="week-gels-carbs">({g.carbs_g}g)</span></span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="session-list">
         {week.sessions.map(session => (
