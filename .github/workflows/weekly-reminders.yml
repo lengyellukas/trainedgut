@@ -1,0 +1,25 @@
+name: Weekly reminder emails
+
+on:
+  # Sunday 18:00 UTC = 19:00 CET (winter) / 20:00 CEST (summer)
+  # — comfortable Sunday-evening hour for European athletes year-round.
+  schedule:
+    - cron: '0 18 * * 0'
+  # Allow manual trigger from the Actions tab for testing.
+  workflow_dispatch:
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    environment: PROD
+    steps:
+      - name: Hit weekly-reminders endpoint
+        run: |
+          status=$(curl -s -o response.txt -w "%{http_code}" \
+            -X POST \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            "${{ vars.BACKEND_URL }}/admin/cron/weekly-reminders")
+          echo "HTTP status: $status"
+          cat response.txt
+          test "$status" = "200"

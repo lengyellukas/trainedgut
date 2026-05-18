@@ -1,6 +1,7 @@
+import os
 from datetime import date
 
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -13,6 +14,7 @@ from persistence import save_plan, save_feedback, save_extra_session, find_or_cr
 from auth import get_current_user
 from pdf_generator import generate_plan_pdf
 from email_service import send_plan_email
+from send_weekly_reminders import send_weekly_reminders
 
 app = FastAPI(title="TrainedGut API", version="0.1.0")
 
@@ -182,3 +184,15 @@ def list_extra_sessions_endpoint(
 ):
     """Return all unplanned sessions logged against the user's active plan."""
     return list_extra_sessions(db, supabase_user_id=user["sub"])
+
+
+# ── Cron / admin endpoints ──────────────────────────────────────────────
+# Not JWT-protected (no user context). Authenticated by a shared CRON_SECRET
+# env var. Intended to be triggered by GitHub Actions on a schedule.
+
+@app.post("/admin/cron/weekly-reminders")
+def cron_weekly_reminders(x_cron_secret: str = Header(default="")):
+    expected = os.environ.get("CRON_SECRET", "")
+    if not expected or x_cron_secret != expected:
+        raise HTTPException(status_code=401, detail="invalid or missing cron secret")
+    return send_weekly_reminders()
