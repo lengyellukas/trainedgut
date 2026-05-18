@@ -219,8 +219,12 @@ def _build_package_page(pdf: FPDF, plan: Plan) -> None:
     pdf.cell(0, 6, f"Total gels in plan: {plan.gel_package.total_gels}", new_x="LMARGIN", new_y="NEXT")
 
 
-def generate_plan_pdf(response: GeneratePlanResponse) -> bytes:
-    """Render a multi-page PDF of the given plan response. Returns the raw bytes."""
+def generate_plan_pdf(response: GeneratePlanResponse, week_number: int | None = None) -> bytes:
+    """Render a PDF of the plan. Pass `week_number` to render only that week.
+
+    Full PDF: cover + all weeks + package shopping list.
+    Single-week PDF: lightweight one-week handout (header + that week's block).
+    """
     if not response.plan:
         raise ValueError("Cannot build PDF for a response without a plan")
 
@@ -230,14 +234,24 @@ def generate_plan_pdf(response: GeneratePlanResponse) -> bytes:
     pdf.set_margins(10, 18, 10)
     pdf.add_page()
 
-    _build_cover(pdf, response)
-
-    pdf.add_page()
-    _h2(pdf, "Week-by-week protocol")
-    pdf.ln(2)
-    for week in response.plan.weeks:
-        _build_week_block(pdf, week)
-
-    _build_package_page(pdf, response.plan)
+    if week_number is None:
+        _build_cover(pdf, response)
+        pdf.add_page()
+        _h2(pdf, "Week-by-week protocol")
+        pdf.ln(2)
+        for week in response.plan.weeks:
+            _build_week_block(pdf, week)
+        _build_package_page(pdf, response.plan)
+    else:
+        target_week = next((w for w in response.plan.weeks if w.week_number == week_number), None)
+        if not target_week:
+            raise ValueError(f"Week {week_number} not in this plan")
+        _h2(pdf, f"Week {target_week.week_number} of {response.plan.total_weeks}")
+        pdf.set_text_color(*GRAY)
+        pdf.set_font("Helvetica", "", 11)
+        pdf.cell(0, 6, f"{_format_date(target_week.start_date)} to {_format_date(target_week.end_date)}",
+                 new_x="LMARGIN", new_y="NEXT")
+        pdf.ln(8)
+        _build_week_block(pdf, target_week)
 
     return bytes(pdf.output())

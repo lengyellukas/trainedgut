@@ -228,6 +228,43 @@
   font-size: 12px;
 }
 
+/* ── EMAIL ACTIONS (under the week card) ─────────────────────── */
+.email-actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-email {
+  flex: 1;
+  min-width: 200px;
+  background: var(--orange);
+  border: 1px solid var(--orange);
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 14px 24px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-email:hover { background: #c9431a; border-color: #c9431a; }
+
+.btn-email--secondary {
+  background: transparent;
+  color: var(--orange);
+}
+.btn-email--secondary:hover {
+  background: var(--orange);
+  color: white;
+}
+
+@media (max-width: 680px) {
+  .email-actions { flex-direction: column; }
+}
+
 /* ── SHIPPING NOTE ───────────────────────────────────────────── */
 .plan-shipping-note {
   margin-top: 32px;

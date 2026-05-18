@@ -142,10 +142,11 @@ export default function App() {
     setView('menu')
   }
 
-  async function handleEmailPlan() {
+  async function handleEmailPlan(weekNumber = null) {
     try {
-      const result = await emailActivePlan()
-      alert(`Plan emailed to ${result.email}. Check your inbox (and spam folder).`)
+      const result = await emailActivePlan({ weekNumber })
+      const what = weekNumber != null ? `Week ${weekNumber}` : 'Full plan'
+      alert(`${what} emailed to ${result.email}. Check your inbox (and spam folder).`)
     } catch (err) {
       alert(`Could not send the email. ${err.message || ''}`)
     }

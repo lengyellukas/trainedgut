@@ -108,19 +108,23 @@ def delete_active_plan_endpoint(
 
 @app.post("/plan/email", status_code=200)
 def resend_plan_email_endpoint(
+    week_number: int | None = None,
     user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Re-send the user's active plan to their email (HTML body + PDF attachment)."""
+    """Email the user's active plan. Pass ?week_number=N to email just that week."""
     response = load_active_plan_response(db, supabase_user_id=user["sub"])
     if not response or not response.plan:
         raise HTTPException(status_code=404, detail="No active plan to email")
+    if week_number is not None:
+        if not any(w.week_number == week_number for w in response.plan.weeks):
+            raise HTTPException(status_code=400, detail=f"Week {week_number} is not in your active plan")
     try:
-        pdf_bytes = generate_plan_pdf(response)
-        send_plan_email(user["email"], response, pdf_bytes, subject="Your TrainedGut plan (resend)")
+        pdf_bytes = generate_plan_pdf(response, week_number=week_number)
+        send_plan_email(user["email"], response, pdf_bytes, week_number=week_number)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Could not send email: {exc}")
-    return {"status": "sent", "email": user["email"]}
+    return {"status": "sent", "email": user["email"], "week_number": week_number}
 
 
 @app.post("/feedback", status_code=201)

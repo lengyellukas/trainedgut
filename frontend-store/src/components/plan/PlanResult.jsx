@@ -41,7 +41,6 @@ export default function PlanResult({ plan: response, extraSessions = [], onExtra
         <span className="plan-topbar-logo">TrainedGut</span>
         <div style={{ display: 'flex', gap: 12 }}>
           <button className="btn-reset" onClick={onReset}>← Menu</button>
-          {onEmail && <button className="btn-reset" onClick={onEmail}>Email plan</button>}
           {onLogout && <button className="btn-reset" onClick={onLogout}>Log out</button>}
         </div>
       </div>
@@ -109,6 +108,17 @@ export default function PlanResult({ plan: response, extraSessions = [], onExtra
           extraSessions={extraSessions.filter(es => es.week_number === week.week_number)}
           onExtrasChanged={onExtrasChanged}
         />
+
+        {onEmail && (
+          <div className="email-actions">
+            <button className="btn-email" onClick={() => onEmail(week.week_number)}>
+              Email me this week
+            </button>
+            <button className="btn-email btn-email--secondary" onClick={() => onEmail(null)}>
+              Email me the full plan
+            </button>
+          </div>
+        )}
 
         <p className="plan-shipping-note">
           Gels are shipped in bundles aligned to your training phases - you won't receive

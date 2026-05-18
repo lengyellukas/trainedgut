@@ -43,8 +43,9 @@ export async function deleteActivePlan() {
   return request('DELETE', '/plan')
 }
 
-export async function emailActivePlan() {
-  return request('POST', '/plan/email')
+export async function emailActivePlan({ weekNumber } = {}) {
+  const qs = weekNumber != null ? `?week_number=${encodeURIComponent(weekNumber)}` : ''
+  return request('POST', `/plan/email${qs}`)
 }
 
 export async function generatePlan(formData) {
