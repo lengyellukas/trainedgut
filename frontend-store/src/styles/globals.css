@@ -117,6 +117,106 @@ img, table { max-width: 100%; }
   }
 }
 
+/* ── CONFIRM DIALOG ─────────────────────────────────────────── */
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 10000;
+  animation: confirm-fade-in 0.15s ease-out;
+}
+
+.confirm-dialog {
+  background: var(--dark-2);
+  border-top: 3px solid var(--orange);
+  max-width: 440px;
+  width: 100%;
+  padding: 28px 28px 20px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  animation: confirm-pop-in 0.18s ease-out;
+}
+
+.confirm-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 0.04em;
+  color: var(--white);
+  margin-bottom: 12px;
+}
+
+.confirm-message {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.confirm-btn {
+  background: none;
+  border: 1px solid;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 10px 22px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.confirm-btn--cancel {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.65);
+}
+.confirm-btn--cancel:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  color: var(--white);
+}
+
+.confirm-btn--primary {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+.confirm-btn--primary:hover {
+  background: var(--orange);
+  color: white;
+}
+
+.confirm-btn--danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.confirm-btn--danger:hover {
+  background: var(--danger);
+  color: white;
+}
+
+@keyframes confirm-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes confirm-pop-in {
+  from { transform: translateY(-8px) scale(0.98); opacity: 0; }
+  to   { transform: translateY(0) scale(1);       opacity: 1; }
+}
+
+@media (max-width: 680px) {
+  .confirm-dialog { padding: 22px 22px 16px; }
+  .confirm-actions { justify-content: stretch; }
+  .confirm-btn { flex: 1; }
+}
+
 /* ── AUTH SCREEN ────────────────────────────────────────────── */
 .auth-shell {
   min-height: 100vh;

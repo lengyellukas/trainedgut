@@ -85,11 +85,30 @@ export default function App() {
   const [extraSessions, setExtraSessions] = useState([])
   const [profile, setProfile] = useState(null)
   const [toast, setToast] = useState(null)   // { message, kind: 'success'|'error' } | null
+  const [confirm, setConfirm] = useState(null) // { title, message, confirmLabel, danger, onConfirm, onCancel } | null
 
   function showToast(message, kind = 'success') {
     setToast({ message, kind })
     window.setTimeout(() => setToast(null), 4000)
   }
+
+  function showConfirm({ title, message, confirmLabel = 'Confirm', cancelLabel = 'Cancel', danger = false }) {
+    return new Promise(resolve => {
+      setConfirm({
+        title, message, confirmLabel, cancelLabel, danger,
+        onConfirm: () => { setConfirm(null); resolve(true) },
+        onCancel:  () => { setConfirm(null); resolve(false) },
+      })
+    })
+  }
+
+  // ESC cancels an open confirm dialog
+  useEffect(() => {
+    if (!confirm) return
+    const onKey = e => { if (e.key === 'Escape') confirm.onCancel() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [confirm])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -159,7 +178,13 @@ export default function App() {
   }
 
   async function handleCancelPlan() {
-    if (!window.confirm('End this plan early? All sessions, feedback and unplanned-session logs for this plan will be permanently removed.')) return
+    const ok = await showConfirm({
+      title: 'End plan early?',
+      message: 'All sessions, feedback and unplanned-session logs for this plan will be permanently removed. You can generate a new plan afterwards.',
+      confirmLabel: 'End plan',
+      danger: true,
+    })
+    if (!ok) return
     try {
       await deleteActivePlan()
       setPlan(null)
@@ -220,17 +245,40 @@ export default function App() {
     </div>
   )
 
+  const confirmEl = confirm && (
+    <div className="confirm-backdrop" onMouseDown={confirm.onCancel} role="dialog" aria-modal="true">
+      <div className="confirm-dialog" onMouseDown={e => e.stopPropagation()}>
+        <h3 className="confirm-title">{confirm.title}</h3>
+        <p className="confirm-message">{confirm.message}</p>
+        <div className="confirm-actions">
+          <button className="confirm-btn confirm-btn--cancel" onClick={confirm.onCancel}>
+            {confirm.cancelLabel}
+          </button>
+          <button
+            className={`confirm-btn ${confirm.danger ? 'confirm-btn--danger' : 'confirm-btn--primary'}`}
+            onClick={confirm.onConfirm}
+            autoFocus
+          >
+            {confirm.confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
+  const overlays = (<>{toastEl}{confirmEl}</>)
+
   if (authLoading) {
     return (
       <>
         <div className="loading-screen"><div className="spinner" /></div>
-        {toastEl}
+        {overlays}
       </>
     )
   }
 
   if (!session) {
-    return <>{<AuthScreen />}{toastEl}</>
+    return <>{<AuthScreen />}{overlays}</>
   }
 
   if (loading) {
@@ -241,7 +289,7 @@ export default function App() {
           <div className="loading-title">Building your plan…</div>
           <div className="loading-sub">Calculating your week-by-week protocol</div>
         </div>
-        {toastEl}
+        {overlays}
       </>
     )
   }
@@ -255,7 +303,7 @@ export default function App() {
           onSelect={handleMenuSelect}
           onLogout={handleLogout}
         />
-        {toastEl}
+        {overlays}
       </>
     )
   }
@@ -271,7 +319,7 @@ export default function App() {
           onBack={goToMenu}
           onLogout={handleLogout}
         />
-        {toastEl}
+        {overlays}
       </>
     )
   }
@@ -288,7 +336,7 @@ export default function App() {
           onCancel={handleCancelPlan}
           onEmail={handleEmailPlan}
         />
-        {toastEl}
+        {overlays}
       </>
     )
   }
@@ -335,7 +383,7 @@ export default function App() {
           </footer>
         )}
       </div>
-      {toastEl}
+      {overlays}
     </>
   )
 }
