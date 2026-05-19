@@ -252,16 +252,20 @@ def send_plan_email(
     msg.attach(pdf_part)
 
     context = ssl.create_default_context()
+    print(f"[email_service] Attempting to send to {to_email} via {SMTP_HOST}:{SMTP_PORT}")
     try:
+        # 15s timeout so a blocked/geofenced SMTP server fails fast instead of
+        # hanging the request until the proxy times out
         if SMTP_PORT == 465:
-            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=context) as smtp:
+            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=context, timeout=15) as smtp:
                 smtp.login(SMTP_USER, SMTP_PASSWORD)
                 smtp.send_message(msg)
         else:
-            with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as smtp:
+            with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as smtp:
                 smtp.starttls(context=context)
                 smtp.login(SMTP_USER, SMTP_PASSWORD)
                 smtp.send_message(msg)
         print(f"[email_service] Plan email sent to {to_email}")
     except Exception as e:
-        print(f"[email_service] Failed to send plan email to {to_email}: {e}")
+        print(f"[email_service] Failed to send plan email to {to_email}: {type(e).__name__}: {e}")
+        raise
