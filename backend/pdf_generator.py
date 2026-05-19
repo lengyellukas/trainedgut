@@ -232,6 +232,10 @@ def generate_plan_pdf(response: GeneratePlanResponse, week_number: int | None = 
     pdf.alias_nb_pages()
     pdf.set_auto_page_break(auto=True, margin=18)
     pdf.set_margins(10, 18, 10)
+    # Hint to PDF viewers: scroll pages continuously, fit width to viewport.
+    # Mobile viewers (iOS Mail, Safari) otherwise default to one-page-per-screen,
+    # which makes swiping feel like zoom rather than navigation.
+    pdf.set_display_mode(zoom="fullwidth", layout="continuous")
     pdf.add_page()
 
     if week_number is None:
