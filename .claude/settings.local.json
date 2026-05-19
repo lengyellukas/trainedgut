@@ -22,7 +22,8 @@
       "Bash(./venv/bin/pip install *)",
       "Bash(./venv/bin/python -c ' *)",
       "Bash(./venv/bin/python seed.py)",
-      "Bash(./venv/bin/python seed_third_party.py)"
+      "Bash(./venv/bin/python seed_third_party.py)",
+      "Bash(./venv/bin/python -c \"from email_service import send_plan_email, _configured; print\\('import OK, configured:', _configured\\(\\)\\)\")"
     ]
   }
 }

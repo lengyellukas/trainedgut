@@ -1,37 +1,34 @@
-"""SMTP email delivery for plan generation + future transactional emails.
+"""Transactional email delivery via Resend.
 
-SMTP credentials come from env vars:
-    SMTP_HOST       e.g. smtp.websupport.sk
-    SMTP_PORT       e.g. 465 (SSL) or 587 (STARTTLS)
-    SMTP_USER       full mailbox address, e.g. join@trainedgut.com
-    SMTP_PASSWORD   mailbox password
-    FROM_EMAIL      optional override for the From: header (defaults to SMTP_USER)
-    FROM_NAME       optional display name (defaults to "TrainedGut")
+Env vars:
+    RESEND_API_KEY    e.g. re_abc123...           (required)
+    FROM_EMAIL        sender address              (required; until your domain
+                                                   is verified in Resend, use
+                                                   onboarding@resend.dev)
+    FROM_NAME         display name in the From header (defaults to "TrainedGut")
 
-If any required var is missing, send is a no-op (logs and returns). Plan
-generation itself must never fail because of an email problem.
+If RESEND_API_KEY or FROM_EMAIL is missing, send is a no-op (logs and returns).
+Plan generation itself must never fail because of an email problem.
 """
+import base64
 import os
-import smtplib
-import ssl
 from datetime import date
-from email.mime.application import MIMEApplication
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+
+import resend
 
 from protocol.models import GeneratePlanResponse
 
 
-SMTP_HOST = os.environ.get("SMTP_HOST")
-SMTP_PORT = int(os.environ.get("SMTP_PORT", "465"))
-SMTP_USER = os.environ.get("SMTP_USER")
-SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
-FROM_EMAIL = os.environ.get("FROM_EMAIL", SMTP_USER)
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
+FROM_EMAIL = os.environ.get("FROM_EMAIL")
 FROM_NAME = os.environ.get("FROM_NAME", "TrainedGut")
 
+if RESEND_API_KEY:
+    resend.api_key = RESEND_API_KEY
 
-def _smtp_configured() -> bool:
-    return all([SMTP_HOST, SMTP_USER, SMTP_PASSWORD, FROM_EMAIL])
+
+def _configured() -> bool:
+    return bool(RESEND_API_KEY and FROM_EMAIL)
 
 
 def _build_week_email_html(response: GeneratePlanResponse, week_number: int) -> str:
@@ -218,54 +215,44 @@ def send_plan_email(
     If week_number is set, the body shows just that week's summary and the PDF
     attachment is named accordingly.
     """
-    if not _smtp_configured():
-        print("[email_service] SMTP not configured, skipping plan email")
+    if not _configured():
+        print("[email_service] Resend not configured (set RESEND_API_KEY + FROM_EMAIL), skipping email")
         return
     if not response.plan:
         return
 
-    msg = MIMEMultipart()
-    msg["From"] = f"{FROM_NAME} <{FROM_EMAIL}>"
-    msg["To"] = to_email
     if subject is None:
         subject = (
             f"Your TrainedGut plan - Week {week_number}"
             if week_number is not None
             else "Your TrainedGut plan is ready"
         )
-    msg["Subject"] = subject
 
     html_body = (
         _build_week_email_html(response, week_number)
         if week_number is not None
         else _build_plan_email_html(response)
     )
-    msg.attach(MIMEText(html_body, "html", _charset="utf-8"))
 
     pdf_filename = (
         f"trainedgut-week-{week_number}.pdf"
         if week_number is not None
         else "trainedgut-plan.pdf"
     )
-    pdf_part = MIMEApplication(pdf_bytes, _subtype="pdf")
-    pdf_part.add_header("Content-Disposition", "attachment", filename=pdf_filename)
-    msg.attach(pdf_part)
 
-    context = ssl.create_default_context()
-    print(f"[email_service] Attempting to send to {to_email} via {SMTP_HOST}:{SMTP_PORT}")
+    print(f"[email_service] Attempting to send to {to_email} via Resend (from {FROM_EMAIL})")
     try:
-        # 15s timeout so a blocked/geofenced SMTP server fails fast instead of
-        # hanging the request until the proxy times out
-        if SMTP_PORT == 465:
-            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=context, timeout=15) as smtp:
-                smtp.login(SMTP_USER, SMTP_PASSWORD)
-                smtp.send_message(msg)
-        else:
-            with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as smtp:
-                smtp.starttls(context=context)
-                smtp.login(SMTP_USER, SMTP_PASSWORD)
-                smtp.send_message(msg)
-        print(f"[email_service] Plan email sent to {to_email}")
+        result = resend.Emails.send({
+            "from": f"{FROM_NAME} <{FROM_EMAIL}>",
+            "to": [to_email],
+            "subject": subject,
+            "html": html_body,
+            "attachments": [{
+                "filename": pdf_filename,
+                "content": base64.b64encode(pdf_bytes).decode("ascii"),
+            }],
+        })
+        print(f"[email_service] Plan email sent to {to_email} (resend id: {result.get('id')})")
     except Exception as e:
         print(f"[email_service] Failed to send plan email to {to_email}: {type(e).__name__}: {e}")
         raise
