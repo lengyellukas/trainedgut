@@ -44,7 +44,7 @@ async function handleSignup(inputId, msgId, btnId, source) {
       msg.textContent = data.message || 'Something went wrong. Please try again.';
       msg.style.display = 'block';
       btn.disabled = false;
-      btn.textContent = source === 'hero' ? 'Notify Me' : 'Get Early Access';
+      btn.textContent = 'Reserve my discount';
     }
   } catch (err) {
     msg.className = 'form-message error-msg';
