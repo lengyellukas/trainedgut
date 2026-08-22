@@ -5,18 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TrainedGut - personalised gut training for endurance athletes</title>
     <meta name="description"
-          content="A personalised gut-training program for endurance racers. Progressive energy-gel protocols built around your race, your long sessions, your body. Launching for the 2027 season.">
+          content="A personalised gut-training program for endurance racers. Progressive energy-gel protocols matched to your race, phase by phase. Launching for the 2027 season.">
     <meta property="og:title" content="TrainedGut - personalised gut training for endurance athletes">
     <meta property="og:description"
           content="Energy gels exist. Training plans exist. A program that teaches your gut to handle race-day fuel - that's what's been missing.">
     <meta property="og:url" content="https://www.trainedgut.com">
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:ital@1&display=swap"
-          rel="stylesheet">
-
-    <!-- Styles -->
+    <!-- Styles (fonts are self-hosted and declared in style.css) -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -39,36 +34,35 @@
         </p>
 
         <div class="signup-form signup-primary">
-            <label class="form-label">Founding members · 10% off at launch</label>
+            <label class="form-label">Launch list</label>
             <div class="form-row">
                 <input class="form-input" type="email" id="hero-email" placeholder="your@email.com"
                        autocomplete="email">
                 <button class="form-btn form-btn-primary" id="hero-btn"
-                        onclick="handleSignup('hero-email','hero-msg','hero-btn','hero')">Reserve my discount
+                        onclick="handleSignup('hero-email','hero-msg','hero-btn','hero')">Notify me
                 </button>
             </div>
             <div class="form-message" id="hero-msg"></div>
-            <p class="form-note">Lock in your launch discount. First to know when we go live. No spam.</p>
+            <p class="form-note">Two emails before launch. One when we go live. That's it.</p>
         </div>
     </div>
 
     <div class="hero-right">
         <div class="stats-grid">
             <div class="stat-card">
-                <span class="stat-num">90%</span>
-                <span class="stat-desc">Of endurance athletes suffer GI distress in races. Almost none train their gut.</span>
+                <span class="stat-num">4-93%</span>
+                <span class="stat-desc">Reported GI symptom rates, marathon to ultra. The longer the race, the higher the number.</span>
+                <span class="stat-source">SDA / Ultra Sports Science Foundation position statement, Sports Medicine 2025</span>
             </div>
             <div class="stat-card">
-                <span class="stat-num">2<span style="font-family:'DM Sans',sans-serif;font-size:34px;font-weight:400;letter-spacing:-0.02em;">x</span></span>
-                <span class="stat-desc">Increase in carbohydrate absorption after progressive gut training</span>
+                <span class="stat-num">45-54%</span>
+                <span class="stat-desc">Drop in carbohydrate malabsorption after two weeks of repeated gel feeding during training.</span>
+                <span class="stat-source">Martinez et al., Sports Medicine 2023 - pooled across 8 studies</span>
             </div>
             <div class="stat-card">
-                <span class="stat-num">120</span>
-                <span class="stat-desc">Grams of carbs per hour that elite endurance athletes hit on race day</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-num">8%</span>
-                <span class="stat-desc">Faster time trials with a gut trained for glucose + fructose fuelling</span>
+                <span class="stat-num">28%</span>
+                <span class="stat-desc">Less carbohydrate swallowed for the same fuel delivered, when the dose was matched to the individual.</span>
+                <span class="stat-source">Podlogar et al., Performance Nutrition 2025</span>
             </div>
         </div>
     </div>
@@ -102,7 +96,7 @@
         <!-- Row 1: title left, empty right -->
         <div class="science-title-block fade-up">
             <p class="section-tag">The science</p>
-            <h2 class="section-title">Your gut is a<br><em>trainable</em><br>muscle</h2>
+            <h2 class="section-title">Your gut<br><em>adapts</em><br>to what you feed it</h2>
         </div>
 
         <div class="science-title-spacer"></div>
@@ -110,7 +104,7 @@
         <!-- Row 2: stats left, studies right -->
         <div class="science-left fade-up">
             <p class="science-intro">
-                Past two hours of endurance racing, <strong>carbohydrate availability - not fitness - is what starts to fail first</strong>. The good news: your gut can be trained to handle more fuel.
+                Past two hours of endurance racing, <strong>carbohydrate availability - not fitness - is what starts to fail first</strong>. Feed the gut more carbohydrate, regularly, and it builds more of the transporters that absorb it. <strong>Glucose and fructose use separate routes</strong>, which is why the ratio matters as the dose climbs.
             </p>
             <div class="science-stats">
                 <div class="science-stat">
@@ -120,10 +114,6 @@
                 <div class="science-stat">
                     <span class="science-stat-num">60%</span>
                     <span class="science-stat-desc"><strong>Total GI symptoms</strong> reduced by gut training across a systematic review of eight trials - with carbohydrate malabsorption down 45-54% and gut discomfort down 47%.</span>
-                </div>
-                <div class="science-stat">
-                    <span class="science-stat-num">120</span>
-                    <span class="science-stat-desc"><strong>Grams of carbs absorbed each hour</strong> when the glucose-fructose ratio moves from 2:1 to 0.8:1 - more fuel oxidised than at 90 grams per hour, with no difference in GI comfort.</span>
                 </div>
                 <div class="science-stat">
                     <span class="science-stat-num">28%</span>
@@ -144,13 +134,21 @@
                 </a>
                 <a class="study-card" href="https://link.springer.com/article/10.1007/s00421-022-05019-w" target="_blank" rel="noopener">
                     <p class="study-journal">European Journal of Applied Physiology · Podlogar et al., 2022</p>
-                    <p class="study-finding">At 120 grams per hour with a 0.8:1 glucose-fructose ratio, athletes <strong>oxidised more exogenous carbohydrate than at 90 grams per hour at 2:1</strong> - with no difference in GI comfort.</p>
+                    <p class="study-finding">At very high hourly intake, <strong>shifting the glucose-fructose ratio from the classic 2:1 toward 1:1 raised how much fuel athletes actually absorbed</strong> - with no difference in GI comfort.</p>
                 </a>
                 <a class="study-card" href="https://link.springer.com/article/10.1186/s44410-025-00003-9" target="_blank" rel="noopener">
                     <p class="study-journal">Performance Nutrition · Podlogar et al., 2025</p>
                     <p class="study-finding">Personalised carbohydrate feeding delivered the <strong>same fuel oxidation on 28% less carbohydrate</strong>, with lower stomach fullness and lower perceived effort in trained athletes.</p>
                 </a>
             </div>
+        </div>
+
+        <!-- Row 3: counter-evidence spanning full width -->
+        <div class="counter-evidence fade-up" style="transition-delay:0.3s">
+            <p class="section-tag counter-tag">What the evidence doesn't say</p>
+            <p class="counter-body">
+                Two weeks of very high carbohydrate plus gut training produced no extra performance benefit in elite race-walkers, and slightly more GI symptoms (<a href="https://www.mdpi.com/2072-6643/14/9/1929" target="_blank" rel="noopener"><em>King et al., 2022</em></a>). A 2025 review argues the evidence for <span class="nowrap">&ge;100 g/h</span> improving performance is still limited (<a href="https://link.springer.com/article/10.1007/s40279-025-02372-6" target="_blank" rel="noopener"><em>Wilson</em></a>). We think the failure mode in both cases is "more carbs for everyone" - the opposite of a progressive, individual protocol. But you should know the argument exists.
+            </p>
         </div>
 
     </div>
@@ -163,7 +161,7 @@
 <section class="how-section">
     <div style="max-width:1200px;margin:0 auto;">
         <p class="section-tag">How it works</p>
-        <h2 class="section-title" style="color:white">Built around<br><em style="color:var(--gold)">your</em> race day
+        <h2 class="section-title" style="color:white">Built around<br>your race day
         </h2>
     </div>
     <div class="steps-track">
@@ -171,31 +169,31 @@
             <div class="step-accent"></div>
             <div class="step-num">01</div>
             <div class="step-title">Tell Us Your Race</div>
-            <p class="step-body">Race, date, expected duration, current fuelling. 3 minutes.</p>
+            <p class="step-body">Race, date, current gel-per-hour habit, past GI history. The data is used to set your starting dose.</p>
         </div>
         <div class="step fade-up" style="transition-delay:0.08s">
             <div class="step-accent"></div>
             <div class="step-num">02</div>
             <div class="step-title">Your Protocol Is Built</div>
-            <p class="step-body">A week-by-week gel plan matched to your long sessions.</p>
+            <p class="step-body">A week-by-week gel plan starting slightly below your current tolerance and adding no more than 10 grams per hour every two to three weeks.</p>
         </div>
         <div class="step fade-up" style="transition-delay:0.16s">
             <div class="step-accent"></div>
             <div class="step-num">03</div>
             <div class="step-title">Gels Ship For Each Phase</div>
-            <p class="step-body">Regular deliveries with the right gels for the next block. Labelled by week.</p>
+            <p class="step-body">The gels for the next phase only - Foundation carbs first, then Build, then Race-Specific. Each pack labelled by the week.</p>
         </div>
         <div class="step fade-up" style="transition-delay:0.24s">
             <div class="step-accent"></div>
             <div class="step-num">04</div>
             <div class="step-title">The Plan Adjusts As You Train</div>
-            <p class="step-body">Log how each session felt. The next block adapts - dose, ratio, timing.</p>
+            <p class="step-body">After each long session, note how it went. A rough block holds the dose; a smooth one adds up to 10 grams per hour.</p>
         </div>
         <div class="step fade-up" style="transition-delay:0.32s">
             <div class="step-accent"></div>
             <div class="step-num">05</div>
             <div class="step-title">Race Day Ready</div>
-            <p class="step-body">Arrive with a gut trained for your exact race - and rerun the protocol before the next one.</p>
+            <p class="step-body">On race day, take the load you already hit in training - the one you tested on your last long session. No new experiments.</p>
         </div>
     </div>
 </section>
@@ -206,9 +204,9 @@
 
         <div class="fade-up">
             <p class="section-tag">Sample program</p>
-            <h2 class="section-title">The path from now<br><em>to race day.</em></h2>
+            <h2 class="section-title">The path from now<br>to race day.</h2>
             <p style="font-size:14px;line-height:1.8;color:var(--gray);max-width:420px;">
-                  Every program is different. Your program starts where you are. It ends where your race needs you to be.
+                  Example: a 16-week Ironman build for an athlete currently taking 45 grams per hour. A 10-week half-marathon build looks different - fewer weeks, and a lower target load.
             </p>
         </div>
 
@@ -250,16 +248,41 @@
     </div>
 </section>
 
-<!-- ══════════════ WHY THIS EXISTS ══════════════ -->
-<section class="why-section">
-    <div class="why-inner">
-        <p class="section-tag">Why this exists</p>
-        <p class="why-text">
-            Off-the-shelf gel plans hand you a target - 60 grams per hour, 90 grams per hour - and expect your gut to keep up. Past two hours of racing, more athletes drop out for stomach reasons than for muscular ones, and the standard advice ("train your gut") gets delivered as a sentence, not a program.
-        </p>
-        <p class="why-text">
-            TrainedGut is the program. A structured build tied to your race and your long sessions, with gels shipped for each phase. The numbers come from published sports-science research; the full protocol is being reviewed by a sports nutritionist before launch.
-        </p>
+<!-- ══════════════ FOUNDER NOTE ══════════════ -->
+<section class="founder-note">
+    <div class="founder-note-inner">
+        <div class="founder-photo">
+            <img src="img/lukas.jpg" alt="Lukas, founder of TrainedGut" onerror="this.style.display='none'">
+        </div>
+        <div class="founder-body">
+            <p class="section-tag">Why I'm building this</p>
+            <p class="founder-text">
+                I've never been a professional. Sport has simply been my passion for as long as I can remember. My half marathon best is 1:18 - and as the time tells you, that's not fast enough for anyone to pay me for it.
+            </p>
+            <p class="founder-text">
+                I ran that time while eating almost nothing. I was afraid of sugar and afraid of racing with a full stomach, so I under-fuelled for years and called it discipline. When I finally tried to fuel properly, my gut couldn't take it - and I assumed that was just me. It isn't. Tolerance is trainable, and almost nobody trains it on purpose.
+            </p>
+            <p class="founder-text">
+                I'm not a nutritionist, which is exactly why I'm not building this alone - the protocols are being developed together with sports nutritionists. What I bring is an MSc in PE teaching and a BSc in physiotherapy from Masaryk University in Brno, and a BSc in computing from the University of Portsmouth: how the body adapts to load, how to build a progression, and how to turn it into software.
+            </p>
+            <p class="founder-text">
+                The research already exists. The plan doesn't. I'm building the plan, in time for the 2027 season.
+            </p>
+            <p class="founder-signoff">- Lukas</p>
+            <p class="founder-contact"><a href="mailto:lukas@trainedgut.com">lukas@trainedgut.com</a> - I read every email personally.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════ WHO THIS ISN'T FOR ══════════════ -->
+<section class="who-note">
+    <div class="who-note-inner">
+        <p class="section-tag who-note-tag">Who this isn't for</p>
+        <ul class="who-note-list">
+            <li><strong>Races under 90 minutes.</strong> Carb availability only starts to fail past the two-hour mark - a fast half-marathon runs shorter than the window this plan is built for.</li>
+            <li><strong>Races less than 8 weeks out.</strong> The plan needs at least 8 weeks to move tolerance safely. Cramming it into 4 weeks is the exact "more carbs for everyone" failure mode the research warns against.</li>
+            <li><strong>Anyone with a diagnosed GI condition.</strong> Talk to a specialist first - IBS, coeliac disease, or reflux need medical assessment before you decide whether to train tolerance at all.</li>
+        </ul>
     </div>
 </section>
 
@@ -273,21 +296,21 @@
     </p>
 
     <div class="signup-form signup-primary cta-signup">
-        <label class="form-label">Founding members · 10% off at launch</label>
+        <label class="form-label">Launch list</label>
         <div class="form-row">
             <input class="form-input" type="email" id="cta-email" placeholder="your@email.com" autocomplete="email">
             <button class="form-btn form-btn-primary" id="cta-btn"
-                    onclick="handleSignup('cta-email','cta-msg','cta-btn','cta')">Reserve my discount</button>
+                    onclick="handleSignup('cta-email','cta-msg','cta-btn','cta')">Notify me</button>
         </div>
         <div class="form-message" id="cta-msg"></div>
-        <p class="form-note">Lock in your launch discount. First to know when we go live. No spam.</p>
+        <p class="form-note">Two emails before launch. One when we go live. That's it.</p>
     </div>
 </section>
 
 <!-- ══════════════ FOOTER ══════════════ -->
 <footer>
     <div class="footer-brand">TrainedGut</div>
-    <div class="footer-note">© 2025 · trainedgut.com · All rights reserved</div>
+    <div class="footer-note">© 2026 Itamo GmbH · trainedgut.com · Last updated August 2026 · <a href="imprint.html">Imprint</a> · <a href="privacy.html">Privacy</a></div>
 </footer>
 
 <!-- Scripts -->
