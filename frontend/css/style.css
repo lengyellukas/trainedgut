@@ -237,6 +237,16 @@ body {
 
 .form-note { font-size: 11px; color: rgba(255,255,255,0.28); line-height: 1.5; }
 
+/* Sub-CTA line — quieter than the button label but louder than form-note,
+   because it carries the reason to act now (early-bird discount). */
+.form-cta-note {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--gold);
+  margin-top: 14px;
+  max-width: 420px;
+}
+
 .form-message {
   display: none;
   padding: 14px 18px;
@@ -548,6 +558,130 @@ body {
   .step:hover .step-num { color: rgba(232, 82, 26, 0.22); }
 }
 
+/* ── WHY THIS KEEPS HAPPENING ─────────────────────────────── */
+.why-section { background: var(--dark); padding: 100px 64px; }
+.why-inner { max-width: 900px; margin: 0 auto; }
+
+.beats {
+  list-style: none;
+  padding: 0;
+  margin: 48px 0 0;
+  position: relative;
+}
+/* Vertical connecting line through the numbers to convey progression. */
+.beats::before {
+  content: '';
+  position: absolute;
+  left: 21px; top: 22px; bottom: 22px;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--orange), var(--gold));
+  opacity: 0.35;
+}
+.beat {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 14px 0;
+  position: relative;
+}
+.beat-num {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--dark);
+  border: 2px solid var(--orange);
+  color: var(--orange);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.beat-text {
+  font-size: 17px;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.85);
+}
+/* The 5th beat is the trap — brighten to signal the pattern closing. */
+.beat-trap .beat-num { background: var(--orange); color: white; }
+.beat-trap .beat-text { color: white; font-weight: 500; }
+
+.why-close {
+  margin-top: 48px;
+  padding: 28px 32px;
+  background: rgba(232, 82, 26, 0.08);
+  border-left: 3px solid var(--orange);
+  font-size: 17px;
+  line-height: 1.6;
+  color: white;
+}
+
+/* ── THE LOOP ─────────────────────────────────────────────── */
+.loop-section { background: var(--cream); padding: 100px 64px; }
+.loop-inner { max-width: 1100px; margin: 0 auto; }
+
+.loop-diagram {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  margin-top: 48px;
+  align-items: start;
+}
+.loop-figure { margin: 0; text-align: center; }
+.loop-figure svg { width: 100%; height: auto; max-width: 480px; }
+
+.loop-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 0.08em;
+  color: var(--gray);
+  margin-bottom: 20px;
+}
+.loop-label-primary { color: var(--orange); }
+
+/* SVG text nodes — styled via CSS to inherit design tokens. */
+.loop-node {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  fill: var(--gray);
+}
+.loop-node-primary { fill: var(--dark); }
+
+/* Trend chart — numbered station dots and bottom axis labels. */
+.trend-num-primary, .trend-num-gold {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+}
+.trend-num-primary { fill: var(--orange); }
+.trend-num-gold    { fill: var(--gold); }
+/* End-of-trend nodes have a filled background — number flips to cream. */
+.trend-num-primary-end,
+.trend-num-gold-end {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  fill: var(--cream);
+}
+.trend-axis-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  fill: var(--gray);
+}
+
+.loop-caption {
+  margin-top: 48px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--gray);
+  text-align: center;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* ── TIMELINE ─────────────────────────────────────────────── */
 .personal-section { padding: 100px 64px; background: var(--white); }
 .personal-grid {
@@ -697,8 +831,13 @@ footer {
   .science-title-block .section-title { margin-bottom: 0; }
   .steps-track { grid-template-columns: repeat(3, 1fr); }
   .section, .how-section, .personal-section { padding: 72px 32px; }
+  .why-section, .loop-section { padding: 72px 32px; }
   footer { flex-direction: column; gap: 12px; text-align: center; }
   .cta-section { padding: 80px 32px; }
+}
+/* Stack the two loop figures vertically before they get too cramped. */
+@media (max-width: 640px) {
+  .loop-diagram { grid-template-columns: 1fr; gap: 56px; }
 }
 @media (max-width: 560px) {
   .steps-track { grid-template-columns: 1fr; }
@@ -716,111 +855,292 @@ footer {
   .study-finding       { font-size: 15px; line-height: 1.7; color: rgba(255,255,255,0.9); }
   .timeline-title      { font-size: 16px; }
   .timeline-desc       { font-size: 14px; line-height: 1.7; }
-  .founder-text        { font-size: 16px; line-height: 1.8; }
-  .who-note-list li    { font-size: 15px; line-height: 1.7; }
   .counter-body        { font-size: 15px; line-height: 1.7; }
   .stat-desc           { font-size: 15px; }
   .stat-source         { font-size: 12px; }
+
+  .why-section         { padding: 72px 24px; }
+  .beat                { gap: 18px; }
+  .beat-num            { width: 38px; height: 38px; font-size: 18px; }
+  .beat-text           { font-size: 15px; }
+  .beats::before       { left: 18px; }
+  .why-close           { padding: 22px 20px; font-size: 15px; }
+
+  .loop-section        { padding: 72px 24px; }
+  .loop-node           { font-size: 11px; }
 }
 
-/* ── FOUNDER NOTE ─────────────────────────────────────── */
-.founder-note {
-  background: var(--cream);
-  padding: 100px 64px;
-}
-.founder-note-inner {
-  max-width: 900px;
-  margin: 0 auto;
+/* ── THE PEOPLE — two-person card block ───────────────── */
+.people-section { background: var(--cream); padding: 100px 64px; }
+.people-inner { max-width: 1100px; margin: 0 auto; }
+
+.people-grid {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 56px;
+  margin-top: 48px;
   align-items: start;
 }
-.founder-photo {
-  width: 260px;
-  height: 360px;
+
+.person-card { display: flex; flex-direction: column; }
+.person-photo {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  max-width: 380px;
   border-radius: 16px;
   overflow: hidden;
   background: linear-gradient(135deg, var(--gold), var(--orange));
-  margin-top: 8px;
+  margin-bottom: 24px;
 }
-.founder-photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+.person-photo img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
 }
-.founder-body .section-tag { margin-bottom: 20px; }
-.founder-text {
-  font-size: 17px;
+.person-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 30px;
+  letter-spacing: 0.02em;
+  color: var(--dark);
+  margin: 0 0 4px;
+}
+.person-credentials {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin: 0 0 20px;
+}
+.person-bio {
+  font-size: 16px;
   line-height: 1.7;
   color: var(--dark);
-  margin-bottom: 16px;
+  margin: 0 0 20px;
 }
-.founder-signoff {
-  font-size: 17px;
+.person-role {
+  font-size: 15px;
+  line-height: 1.7;
   color: var(--dark);
-  margin-top: 24px;
-  margin-bottom: 4px;
-  font-weight: 500;
+  margin: 0 0 20px;
+  padding: 16px 20px;
+  background: rgba(232, 82, 26, 0.06);
+  border-left: 3px solid var(--orange);
 }
-.founder-contact {
+.person-role-label { font-weight: 500; color: var(--dark); }
+.person-contact {
   font-size: 14px;
   color: rgba(26, 26, 20, 0.7);
-  margin-bottom: 0;
+  margin: 0;
 }
-.founder-contact a {
+.person-contact a {
   color: var(--orange);
   text-decoration: none;
   border-bottom: 1px solid rgba(232, 82, 26, 0.3);
   transition: border-color 0.15s;
 }
-.founder-contact a:hover {
-  border-bottom-color: var(--orange);
+.person-contact a:hover { border-bottom-color: var(--orange); }
+
+@media (max-width: 900px) {
+  .people-section { padding: 72px 32px; }
+  .people-grid { grid-template-columns: 1fr; gap: 64px; }
+  .person-photo { max-width: 320px; }
 }
-@media (max-width: 720px) {
-  .founder-note { padding: 72px 32px; }
-  .founder-note-inner { grid-template-columns: 1fr; gap: 24px; }
-  .founder-photo { width: 180px; height: 250px; margin-top: 0; }
+@media (max-width: 560px) {
+  .people-section { padding: 60px 24px; }
+  .person-name { font-size: 26px; }
+  .person-bio { font-size: 15px; }
 }
 
-/* ── WHO THIS ISN'T FOR ─────────────────────────────────── */
-.who-note {
-  background: var(--cream);
-  padding: 40px 64px 100px;
-  border-top: 1px solid rgba(26, 26, 20, 0.08);
+/* ── DIY OBJECTION ─────────────────────────────────────── */
+.diy-section { background: var(--dark); padding: 100px 64px; }
+.diy-inner { max-width: 900px; margin: 0 auto; }
+.diy-body {
+  margin-top: 40px;
+  font-size: 17px;
+  line-height: 1.75;
+  color: rgba(255,255,255,0.85);
 }
-.who-note-inner {
-  max-width: 720px;
-  margin: 0 auto;
+.diy-body p + p { margin-top: 20px; }
+
+@media (max-width: 560px) {
+  .diy-section { padding: 72px 24px; }
+  .diy-body { font-size: 15px; }
 }
-.who-note-tag {
+
+/* ── QUALIFICATION PAIR ────────────────────────────────── */
+.qual-section { background: var(--cream); padding: 100px 64px; }
+.qual-inner { max-width: 1100px; margin: 0 auto; }
+.qual-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  margin-top: 40px;
+}
+.qual-col {
+  padding: 36px 32px;
+  background: var(--white);
+  border-radius: 12px;
+  border-top: 4px solid var(--orange);
+}
+.qual-col-no { border-top-color: var(--gold); }
+.qual-heading {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 0.03em;
   color: var(--dark);
-  opacity: 0.55;
-  margin-bottom: 20px;
+  margin: 0 0 24px;
 }
-.who-note-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.who-note-list li {
+.qual-heading-no { color: var(--gray); }
+.qual-list { list-style: none; padding: 0; margin: 0; }
+.qual-list li {
   font-size: 15px;
   line-height: 1.7;
   color: var(--dark);
-  margin-bottom: 16px;
-  padding-left: 20px;
+  padding: 12px 0 12px 26px;
   position: relative;
+  border-top: 1px solid rgba(26,26,20,0.08);
 }
-.who-note-list li::before {
-  content: '-';
+.qual-list li:first-child { border-top: none; }
+.qual-list li::before {
+  content: '+';
   position: absolute;
   left: 0;
+  top: 12px;
   color: var(--orange);
   font-weight: 500;
+  font-size: 18px;
+  line-height: 1;
 }
-.who-note-list li:last-child { margin-bottom: 0; }
-.who-note-list strong { color: var(--dark); font-weight: 500; }
+.qual-list-no li::before { content: '\2212'; color: var(--gold); }
+.qual-note {
+  margin: 40px auto 0;
+  padding: 20px 24px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--gray);
+  text-align: center;
+  font-style: italic;
+  max-width: 780px;
+}
+
+@media (max-width: 900px) {
+  .qual-section { padding: 72px 32px; }
+  .qual-grid { grid-template-columns: 1fr; gap: 24px; }
+}
+@media (max-width: 560px) {
+  .qual-section { padding: 60px 24px; }
+  .qual-col { padding: 28px 24px; }
+  .qual-heading { font-size: 24px; }
+}
+
+/* ── WHAT YOU GET ──────────────────────────────────────── */
+.gets-section { background: var(--dark); padding: 100px 64px; }
+.gets-inner { max-width: 900px; margin: 0 auto; }
+.gets-list { list-style: none; padding: 0; margin: 40px 0 0; }
+.gets-list li {
+  font-size: 17px;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.9);
+  padding: 20px 0 20px 40px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  position: relative;
+}
+.gets-list li:last-child { border-bottom: 1px solid rgba(255,255,255,0.08); }
+.gets-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 30px;
+  width: 24px;
+  height: 1px;
+  background: var(--orange);
+}
+.gets-optional { color: rgba(255,255,255,0.7); }
+.gets-optional-tag {
+  display: inline-block;
+  margin-right: 12px;
+  padding: 3px 10px;
+  background: var(--gold);
+  color: var(--dark);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  vertical-align: 2px;
+}
+
+@media (max-width: 560px) {
+  .gets-section { padding: 72px 24px; }
+  .gets-list li { font-size: 15px; padding-left: 32px; }
+  .gets-list li::before { width: 18px; top: 28px; }
+}
+
+/* ── BETA COHORT ───────────────────────────────────────── */
+.beta-section { background: var(--cream); padding: 80px 64px; }
+.beta-inner {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 48px 48px;
+  background: var(--white);
+  border-left: 4px solid var(--orange);
+  border-radius: 4px;
+}
+.beta-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 1;
+  color: var(--dark);
+  margin: 16px 0 20px;
+}
+.beta-body {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--dark);
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .beta-section { padding: 60px 24px; }
+  .beta-inner { padding: 32px 28px; }
+  .beta-body { font-size: 15px; }
+}
+
+/* ── SCOPE AND SAFETY — quiet closing disclosure ─────────── */
+.scope-section {
+  background: var(--dark);
+  padding: 56px 64px 72px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.scope-inner {
+  max-width: 820px;
+  margin: 0 auto;
+}
+.scope-tag {
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 20px;
+}
+.scope-body {
+  font-size: 14px;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.65);
+}
+.scope-body p {
+  margin: 0 0 14px;
+}
+.scope-body p:last-child {
+  margin-bottom: 0;
+}
+
 @media (max-width: 720px) {
-  .who-note { padding: 32px 32px 72px; }
+  .scope-section { padding: 48px 24px 56px; }
+  .scope-body { font-size: 13px; line-height: 1.7; }
+}
+
+/* ── STUDIES INTRO — one-line framing above citation cards ─ */
+.studies-intro {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--gray);
+  margin: 0 0 20px;
+  letter-spacing: 0.01em;
 }
